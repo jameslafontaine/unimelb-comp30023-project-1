@@ -1,13 +1,18 @@
 CC=gcc
 CFLAGS=-Wall
+TEST=list_test
 OUT1=out1
 OUT2=out2
 OUT3=out3
 OUT4=out4
+DLLOBJ=dlinkedlist.o
 OBJ1=obj1.o obj2.o obj3.o
 OBJ2=$(OBJ1) obj4.o
 
 all: $(OUT1) $(OUT2) $(OUT3) $(OUT4)
+
+$(TEST): list_test.c $(DLLOBJ)
+	$(CC) $(CFLAGS) -o $(TEST) $< $(DLLOBJ) -g
 
 $(OUT1): fast.c $(OBJ1)
 	$(CC) $(CFLAGS) -o $(OUT1) $< $(OBJ1)
