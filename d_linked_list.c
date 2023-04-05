@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
-#include "dlinkedlist.h"
+#include "d_linked_list.h"
 
 // MAY NEED TO REFACTOR FUNCTIONS TO TAKE POINTER TO THE POINTER TO THE HEAD SO THAT IT ALTERS THE LIST IN PLACE INSTEAD OF A LOCAL VERSION CREATED WITHIN THE FUNCTION SCOPE
 
@@ -11,7 +11,7 @@ ListNode* insert_at_head(ListNode* head, void* element_ptr) {
 
 	// if head is NULL then the list needs to be initialised
 	if (!head) {
-		printf("head==NULL\n");
+		//printf("head==NULL\n");
 		new_head = (ListNode *)  malloc(sizeof(ListNode));
 		assert(new_head);
 		new_head->element = element_ptr;
@@ -21,7 +21,7 @@ ListNode* insert_at_head(ListNode* head, void* element_ptr) {
 	}
 	// otherwise we insert a new node at the head
 	else {
-		printf("head!=NULL\n");
+		//printf("head!=NULL\n");
 		old_head = head;
 		new_head = (ListNode *) malloc(sizeof(ListNode));
 		assert(head);
