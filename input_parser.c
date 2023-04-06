@@ -67,7 +67,7 @@ char** read_args(int argc, char** argv) {
     return argvalues;
 }
 
-Process* read_process_file(char* filepath) {
+ProcessList* read_process_file(char* filepath) {
 
 	// Open file
 	FILE* fp = fopen(filepath, "r");
@@ -93,10 +93,11 @@ Process* read_process_file(char* filepath) {
 		fprintf(stderr, "Malloc failure\n");
 		exit(EXIT_FAILURE);
 	}
-	int col1, col3, col4;
+	unsigned long col1, col3;
+	short col4;
 	char col2[MAX_NAME_LEN];
-	while (fscanf(fp, "%d %s %d %d", &col1, col2, &col3, &col4) == 4) {
-		//printf("%d %s %d %d\n", col1, col2, col3, col4);
+	while (fscanf(fp, "%lu %s %lu %hd", &col1, col2, &col3, &col4) == 4) {
+		//printf("%lu %s %lu %hd\n", col1, col2, col3, col4);
 		if (processes_len == processes_size) {
 			processes_size *= 2;
 			processes = realloc(processes, sizeof(Process) * processes_size);
@@ -116,11 +117,19 @@ Process* read_process_file(char* filepath) {
 	#ifdef DEBUG_MODE
 	for (int i=0; i < processes_len; i++) {
 		Process example = processes[i];
-		printf("%d %s %d %d\n", example.arrival_time, example.name, example.service_time, example.memory_req);
+		printf("%lu %s %lu %hd\n", example.arrival_time, example.name, example.service_time, example.memory_req);
 	}
 	#endif
 	fclose(fp);
 
-	return processes;
+	ProcessList* process_list = (ProcessList *) malloc(sizeof(ProcessList));
+	if (process_list == NULL) {
+		fprintf(stderr, "Malloc failure\n");
+		exit(EXIT_FAILURE);
+	}
+	process_list->num_processes = processes_len;
+	process_list->processes = processes;
+
+	return process_list;
 }
 	

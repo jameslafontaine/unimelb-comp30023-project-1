@@ -118,6 +118,23 @@ ListNode* retrieve_tail(ListNode* head) {
 	return current;
 }
 
+/*
+int get_list_length(ListNode* head) {
+	int i=0;
+	ListNode* current;
+
+	current = head;
+	while(current) {
+		i++;
+		current = current->next;
+	}
+
+	return i;
+}
+
+*/
+
+
 void free_node(ListNode* node) {
 	free(node);
 	node = NULL;

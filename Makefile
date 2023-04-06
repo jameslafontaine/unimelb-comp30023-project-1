@@ -6,7 +6,7 @@ MAIN=main
 PUTILS=process_utils.o
 OUT1=out1
 OUT2=out2
-DLLOBJ=dlinkedlist.o
+DLL=dlinkedlist.o
 OBJ1=obj1.o obj2.o obj3.o
 OBJ2=$(OBJ1) obj4.o
 

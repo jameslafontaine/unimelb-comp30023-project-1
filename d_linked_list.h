@@ -40,6 +40,11 @@ ListNode* remove_tail(ListNode* head);
 ListNode* retrieve_tail(ListNode* head);
 
 /*
+   calculates the length of the list starting from the supplied head
+ */
+// int get_list_length(ListNode* head);
+
+/*
    frees allocated memory for the given node and double checks
  */
 void free_node(ListNode* node);
