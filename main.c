@@ -22,8 +22,9 @@ int main(int argc, char** argv) {
 
 	free(argvalues);
 	argvalues = NULL;
+	free(process_list->processes);
 	free(process_list);
-	processes = NULL;
+	process_list = NULL;
 
 	return 0;
 }
