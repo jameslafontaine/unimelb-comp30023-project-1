@@ -118,24 +118,52 @@ ListNode* retrieve_tail(ListNode* head) {
 	return current;
 }
 
-/*
-int get_list_length(ListNode* head) {
-	int i=0;
-	ListNode* current;
+void swap_nodes(ListNode** node1, ListNode** node2) {
+	ListNode* tmp_prev;
 
-	current = head;
-	while(current) {
-		i++;
-		current = current->next;
-	}
-
-	return i;
+	tmp_prev = (*node1)->prev;
+   (*node1)->next = (*node2)->next;
+   (*node1)->prev = (*node2);
+   (*node2)->next = (*node1);
+   (*node2)->prev = tmp_prev;
 }
 
-*/
+// Sorts the provided linked list using the provided comparison function and insertion sort
+void ins_sort_list(ListNode** head, int (*cmp_func)(ListNode**, ListNode**)) {
+	ListNode** currenti = head;
+	ListNode** currentj;
+
+	if (*currenti == NULL) {
+		return;
+	}
+    while ((*currenti)->next != NULL) {
+		currenti = &((*currenti)->next);
+		currentj = currenti;
+    	while ((*currentj)->prev != NULL && cmp_func(currentj, &((*currentj)->prev)) == GREATER_THAN) {
+        	swap_nodes(&((*currentj)->prev), currentj);
+        	currentj = &((*currentj)->prev);
+		}
+	}
+		
+}
+
+
+ListNode* enqueue(ListNode* queue_head, void* elem_ptr) {
+    return insert_at_tail(queue_head, elem_ptr);
+}
+
+ListNode* dequeue(ListNode* queue_head) {
+    return remove_head(queue_head);
+}
+
+
+
+
+
 
 
 void free_node(ListNode* node) {
+	free(node->element);
 	free(node);
 	node = NULL;
 	assert(!node);
@@ -152,3 +180,18 @@ void free_list(ListNode* head) {
     	free_node(current);
 	}
 }
+
+/*
+int get_list_length(ListNode* head) {
+	int i=0;
+	ListNode* current;
+
+	current = head;
+	while(current) {
+		i++;
+		current = current->next;
+	}
+
+	return i;
+}
+*/

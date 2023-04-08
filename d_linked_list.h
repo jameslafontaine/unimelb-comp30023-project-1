@@ -1,3 +1,11 @@
+#ifndef DLL_INCLUDED
+#define DLL_INCLUDED
+
+
+#define LESS_THAN -1
+#define EQUAL 0
+#define GREATER_THAN 1
+
 /**
  * Provides various tools for manipulating doubly linked lists
  */
@@ -39,10 +47,26 @@ ListNode* remove_tail(ListNode* head);
  */
 ListNode* retrieve_tail(ListNode* head);
 
+// Place a process at the end of the provided queue
+ListNode* enqueue(ListNode* queue_head, void* elem_ptr);
+
+// Remove a process from the start of the provided queue (doesn't return the process)
+ListNode* dequeue(ListNode* queue_head);
+
 /*
    calculates the length of the list starting from the supplied head
  */
 // int get_list_length(ListNode* head);
+
+
+/*
+   swaps two adjacent nodes in a linked list
+*/
+void swap_nodes(ListNode** node1, ListNode** node2);
+
+
+// Sorts the provided linked list using the provided comparison function and insertion sort
+void ins_sort_list(ListNode** head, int (*cmp_func)(ListNode**, ListNode**));
 
 /*
    frees allocated memory for the given node and double checks
@@ -53,3 +77,5 @@ void free_node(ListNode* node);
    frees an entire linked list and double checks at each node
 */
 void free_list(ListNode* head);
+
+#endif

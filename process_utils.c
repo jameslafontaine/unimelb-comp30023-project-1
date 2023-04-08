@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "process_utils.h"
 
 Process next_process(ProcessList** process_list_ptr) {
@@ -20,4 +21,21 @@ Process next_process(ProcessList** process_list_ptr) {
 		}
         
     return next_process;
+}
+
+
+// translates a process state from int to string
+const char* translate_state(State state) {
+    if (state == READY) {
+        return "READY";
+    }
+    else if (state == RUNNING) {
+        return "RUNNING";
+    }
+    else if (state == FINISHED) {
+        return "FINISHED";
+    }
+    else if (state == FINISHED_PROCESS) {
+        return "FINISHED-PROCESS";
+    }
 }

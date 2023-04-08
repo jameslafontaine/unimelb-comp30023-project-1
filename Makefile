@@ -1,35 +1,24 @@
 CC=gcc
 CFLAGS=-Wall
-TEST=list_test
-INPUT=input_parser.o
-MAIN=main
-PUTILS=process_utils.o
-OUT1=out1
-OUT2=out2
-DLL=dlinkedlist.o
-OBJ1=obj1.o obj2.o obj3.o
-OBJ2=$(OBJ1) obj4.o
+ALLOC=allocate
+ALLOC_DEBUG=allocate-debug
+DLL_O=d_linked_list.o
+PUTILS_O=process_utils.o
+PROC_MAN_O=process_manager.o 
+INPUT_O=input_parser.o
+OUTPUT_O=output.o
 
-all: $(OUT1) $(OUT2) 
+all: $(ALLOC)
 
-$(TEST): list_test.c $(DLLOBJ)
-	$(CC) $(CFLAGS) -o $(TEST) $< $(DLLOBJ) -g
 
-$(MAIN): main.c $(PUTILS) $(INPUT) 
-	$(CC) $(CFLAGS) -o $(MAIN) $< -g $(PUTILS) $(INPUT) 
-
-$(OUT1): fast.c $(OBJ1)
-	$(CC) $(CFLAGS) -o $(OUT1) $< $(OBJ1)
-	
-$(OUT2): slow.c
-	$(CC) $(CFLAGS) -o $(OUT2) $<
-
+$(ALLOC): main.c $(PROC_MAN_O) $(INPUT_O) $(OUTPUT_O) $(PUTILS_O) $(DLL_O)
+	$(CC) $(CFLAGS) -o $(ALLOC) $^
 
 %.o: %.c %.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	rm -f *.o $(OUT1) $(OUT2)
+	rm -f *.o $(ALLOC)
 
 format:
 	clang-format -i *.c *.h

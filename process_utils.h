@@ -1,3 +1,7 @@
+#ifndef PROC_UTILS_INCLUDED
+#define PROC_UTILS_INCLUDED
+
+
 
 #define MAX_NAME_LEN 9
 #define ALLOCATED 1
@@ -8,16 +12,19 @@ typedef int boolean;
 
 
 typedef struct process Process;
-typedef enum { READY = 1, RUNNING = 2, FINISHED = 0} State;
+typedef enum { READY = 2, RUNNING = 3, FINISHED = 0, FINISHED_PROCESS = 1} State;
 
 struct process {
     unsigned long arrival_time;
     char name[MAX_NAME_LEN];
     unsigned long service_time;
+    unsigned long rem_service_time;
     short memory_req;
     short mem_address;
     State state;
     boolean has_mem_alloc;
+    unsigned long finish_time;
+    unsigned long turnaround;
 };
 
 typedef struct process_list ProcessList;
@@ -30,3 +37,9 @@ struct process_list {
 
 // retrives the next process in the file list and shifts everything else up the list
 Process next_process(ProcessList** process_list_ptr);
+
+
+// translates a process state from int to string
+const char* translate_state(State state);
+
+#endif

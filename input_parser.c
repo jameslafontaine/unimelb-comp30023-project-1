@@ -110,6 +110,7 @@ ProcessList* read_process_file(char* filepath) {
 		processes[processes_len].arrival_time = col1;
 		strcpy(processes[processes_len].name, col2);
 		processes[processes_len].service_time = col3;
+		processes[processes_len].rem_service_time = col3;
 		processes[processes_len++].memory_req = col4;
 	}
 

@@ -2,3 +2,5 @@
 build/
 list_test.c
 list_test
+allocate
+header.h
