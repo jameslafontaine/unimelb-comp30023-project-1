@@ -211,7 +211,9 @@ void print_list(ListNode* head) {
 	printf("###################################################################\n");
 }
 
-
+void transfer_node(ListNode** head1, ListNode** head2) {
+	
+}
 
 
 
