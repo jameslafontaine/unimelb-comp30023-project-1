@@ -27,7 +27,7 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
 
     // complete cycles while there are still processes that haven't finished execution
     while (process_list->num_processes > 0 || in_queue_len > 0 || rdy_queue_len > 0 || running_proc != NULL) {
-        printf("Simulation time = %lu\n", simulation_time);
+        //printf("Simulation time = %lu\n", simulation_time);
         check_running_process(&running_proc, &in_queue_len, &rdy_queue_head, &rdy_queue_len, &fnsh_queue_head, &fnsh_queue_len, simulation_time, quantum, sched, &memory_list_head, mem_mng, &event_queue_head, &event_queue_len);
         add_submitted_processes(&in_queue_head, &in_queue_len, &process_list, simulation_time, &event_queue_head, &event_queue_len);
         allocate_memory(&in_queue_head, &in_queue_len, &rdy_queue_head, &rdy_queue_len, &memory_list_head, mem_mng, simulation_time, &event_queue_head, &event_queue_len);
@@ -36,6 +36,8 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
         // Process manager sleeps for quantum seconds, after which a new cycle begins
         simulation_time += quantum;
     }
+    // subtract last quantum added as this cycle doesn't actually occur
+    simulation_time -= quantum;
     calculate_performance_stats(fnsh_queue_head, fnsh_queue_len, simulation_time);
     free_list(&in_queue_head);
     free_list(&rdy_queue_head);
@@ -56,7 +58,7 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
 // subsequent scheduling tasks are performed.
 void check_running_process(Process** running_proc_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, ListNode** fnsh_q_head_ptr, int* fnsh_q_len_ptr, unsigned long sim_time, 
 short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
-    printf("Checking running processes...\n");
+    //printf("Checking running processes...\n");
     
     // do nothing if there is no currently running process
     if (*running_proc_ptr == NULL) {
@@ -71,21 +73,24 @@ short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** e
             deallocate_memory(running_proc_ptr, mem_list_ptr, mem_mng);
             (*running_proc_ptr)->state = FINISHED;
             (*running_proc_ptr)->finish_time = sim_time;
+            //print_process(*running_proc_ptr);
             *fnsh_q_head_ptr = enqueue(*fnsh_q_head_ptr, *running_proc_ptr);
+            //print_process((retrieve_tail(*fnsh_q_head_ptr))->element);
             *fnsh_q_len_ptr += 1;
             // convert remaining time to string for event printing
             char remaining_time[MAX_INFO_LEN];
             sprintf(remaining_time, "%d", *rdy_q_len_ptr + *in_q_len_ptr);
             add_event(event_q_head_ptr, event_q_len_ptr, sim_time, (*running_proc_ptr)->state, (*running_proc_ptr)->name, remaining_time);
-            free(*running_proc_ptr);
+            //free(*running_proc_ptr);
             *running_proc_ptr = NULL;
+            //print_process((retrieve_tail(*fnsh_q_head_ptr))->element);
         }
         // if we are using round robin scheduling then unless this is the only ready process, we must preempt it
         else if (strcmp(sched, "RR") == EQUAL && *rdy_q_len_ptr > 0) {
             (*running_proc_ptr)->state = READY;
             *rdy_q_head_ptr = enqueue(*rdy_q_head_ptr, *running_proc_ptr);
             *rdy_q_len_ptr += 1;
-            free(*running_proc_ptr);
+            //free(*running_proc_ptr);
             *running_proc_ptr = NULL;
         }
         return;
@@ -97,19 +102,19 @@ short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** e
 // they appear in the process file. (Arrival time <= simulation time)
 void add_submitted_processes(ListNode** in_q_head_ptr, int* in_q_len_ptr, ProcessList** process_list_ptr, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     
-    printf("Adding submitted processes...\n");
+    //printf("Adding submitted processes...\n");
     Process* next_proc = malloc(sizeof(Process));
     if (next_proc == NULL) {
         fprintf(stderr, "Malloc failure\n");
         exit(EXIT_FAILURE);
     }
     while ((*process_list_ptr)->num_processes > 0 && ((*process_list_ptr)->processes)[0].arrival_time <= sim_time) {
-        printf("Num processes = %d\n", (*process_list_ptr)->num_processes);
-        printf("Next process arrival time = %lu\n", ((*process_list_ptr)->processes)[0].arrival_time);
-        print_list(*in_q_head_ptr);
+        //printf("Num processes = %d\n", (*process_list_ptr)->num_processes);
+        //printf("Next process arrival time = %lu\n", ((*process_list_ptr)->processes)[0].arrival_time);
+        //print_list(*in_q_head_ptr);
         *next_proc = next_process(process_list_ptr);
         *in_q_head_ptr = enqueue(*in_q_head_ptr , next_proc);
-        print_list(*in_q_head_ptr);
+        //print_list(*in_q_head_ptr);
         *in_q_len_ptr += 1;
     }
     return;
@@ -128,7 +133,7 @@ void add_submitted_processes(ListNode** in_q_head_ptr, int* in_q_len_ptr, Proces
 void allocate_memory(ListNode** in_q_head_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, 
                      ListNode** mem_list, char* mem_mng, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     
-    printf("Attempting to allocate memory...\n");
+    //printf("Attempting to allocate memory...\n");
     Process* next_proc = malloc(sizeof(Process));
     if (next_proc == NULL) {
         fprintf(stderr, "Malloc failure\n");
@@ -198,7 +203,7 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
 
 // Deallocate memory for a finished process
 void deallocate_memory(Process** running_proc_ptr, ListNode** mem_list, char* mem_mng) {
-    printf("Deallocating memory...\n");
+    //printf("Deallocating memory...\n");
     
     Process* fnshd_proc = malloc(sizeof(Process));
     if (fnshd_proc == NULL) {
@@ -227,7 +232,7 @@ void deallocate_memory(Process** running_proc_ptr, ListNode** mem_list, char* me
 // or a READY process which has not previously executed
 void schedule_process(Process** running_proc_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, char* sched, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     
-    printf("Scheduling process...\n");
+    //printf("Scheduling process...\n");
 
     // if the scheduling method is shortest job first then the process with the smallest service time gets
     // to run until completion, so we only need to let a new process run when there isn't a current running process
@@ -235,9 +240,11 @@ void schedule_process(Process** running_proc_ptr, ListNode** rdy_q_head_ptr, int
         
         // find the process in the ready queue with the smallest service time, choose earliest arrival time then
         // the process that comes first lexicographically in the case of ties
-        static int (*cmp_func)(ListNode**, ListNode**);
+        static int (*cmp_func)(ListNode*, ListNode*);
         cmp_func = sjf_cmp;
-        ins_sort_list(rdy_q_head_ptr, cmp_func);
+        //print_list(*rdy_q_head_ptr);
+        *rdy_q_head_ptr = ins_sort_list(*rdy_q_head_ptr, cmp_func);
+        //print_list(*rdy_q_head_ptr);
         start_running(running_proc_ptr, rdy_q_head_ptr, rdy_q_len_ptr);
         // convert remaining time to string for event printing
         char remaining_time[MAX_INFO_LEN];
@@ -282,10 +289,10 @@ void start_running(Process** running_proc_ptr, ListNode** rdy_q_head_ptr, int* r
 
 
 // Compares two processes according to SJF specifications
-int sjf_cmp(ListNode** node1, ListNode** node2) {
+int sjf_cmp(ListNode* node1, ListNode* node2) {
 
-    Process process1 = *((Process*)(*node1)->element);
-    Process process2 = *((Process*)(*node2)->element);
+    Process process1 = *((Process*)(node1->element));
+    Process process2 = *((Process*)(node2->element));
 
     if (process1.service_time < process2.service_time) {
         return LESS_THAN;

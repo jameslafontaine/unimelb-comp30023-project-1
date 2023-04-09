@@ -17,9 +17,11 @@ void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned
 
     ListNode* current = fnsh_q_head;
 
-    while(current) {
+    while (current) {
         current_process = (Process*)(current->element);
+        //print_process(current_process);
         current_turnaround = current_process->finish_time - current_process->arrival_time;
+        //current_process->turnaround = current_turnaround;
         total_turnaround += current_turnaround;
         current_overhead = (double)current_turnaround / current_process->service_time;
         total_overhead += current_overhead;
@@ -28,7 +30,7 @@ void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned
         }
         current = current->next;
     }
-    printf("Turnaround time %d\nTime overhead %.2lf %.2lf\n Makespan %lu", (int)ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
+    printf("Turnaround time %d\nTime overhead %.2lf %.2lf\nMakespan %lu\n", (int)ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
 }
 
 void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time, State state, char proc_name[MAX_NAME_LEN], char info[MAX_INFO_LEN]) {
@@ -47,12 +49,12 @@ void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long 
 }
 
 void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
-    printf("Printing events...\n");
+    //printf("Printing events...\n");
     if (*event_q_len_ptr > 0) {
         Event next_event;
-        static int (*cmp_func)(ListNode**, ListNode**);
+        static int (*cmp_func)(ListNode*, ListNode*);
         cmp_func = event_cmp;
-        ins_sort_list(event_q_head_ptr, cmp_func);
+        *event_q_head_ptr = ins_sort_list(*event_q_head_ptr, cmp_func);
         while (*event_q_len_ptr > 0) {
             next_event = *((Event *)(*event_q_head_ptr)->element);
             if (next_event.state == READY) {
@@ -73,10 +75,20 @@ void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     }
 }
 
-int event_cmp(ListNode** node1, ListNode** node2) {
+void print_process(Process* process) {
+    printf("################################\n");
+    printf("Process Name = %s\n", process->name);
+    printf("Arrival time = %lu\n", process->arrival_time);
+    printf("Finish time = %lu\n", process->finish_time);
+    printf("Service time = %lu\n", process->service_time);
+    printf("State = %d\n", process->state);
+    printf("################################\n");
+}
 
-    Event event1 = *((Event*)(*node1)->element);
-    Event event2 = *((Event*)(*node2)->element);
+int event_cmp(ListNode* node1, ListNode* node2) {
+
+    Event event1 = *((Event*)(node1->element));
+    Event event2 = *((Event*)(node2->element));
 
     if (event1.state < event2.state) {
         return LESS_THAN;

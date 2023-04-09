@@ -47,6 +47,12 @@ ListNode* remove_tail(ListNode* head);
  */
 ListNode* retrieve_tail(ListNode* head);
 
+/*
+   retrieves a pointer to the head node of the list
+ */
+ListNode* retrieve_head(ListNode* node);
+
+
 // Place a process at the end of the provided queue
 ListNode* enqueue(ListNode* queue_head, void* elem_ptr);
 
@@ -63,13 +69,13 @@ void print_list(ListNode* head);
 
 
 /*
-   swaps two adjacent nodes in a linked list
+   swaps the data of two adjacent nodes in a linked list
 */
-void swap_nodes(ListNode** node1, ListNode** node2);
+void swap_nodes(ListNode* node1, ListNode* node2);
 
 
 // Sorts the provided linked list using the provided comparison function and insertion sort
-void ins_sort_list(ListNode** head, int (*cmp_func)(ListNode**, ListNode**));
+ListNode* ins_sort_list(ListNode* head, int (*cmp_func)(ListNode*, ListNode*));
 
 /*
    frees allocated memory for the given node

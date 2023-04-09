@@ -8,7 +8,7 @@
 #include <string.h>
 #include "input_parser.h"
 
-#define DEBUG_MODE
+//#define DEBUG_MODE
 
 // reads the value of each of the command line arguments
 char** read_args(int argc, char** argv) {

@@ -8,7 +8,7 @@
 
 
 // Compares two processes according to SJF specifications
-int sjf_cmp(ListNode** node1, ListNode** node2);
+int sjf_cmp(ListNode* node1, ListNode* node2);
 
 // Run the simulation of the process manager
 void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_list);

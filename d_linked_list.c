@@ -150,32 +150,43 @@ ListNode* retrieve_tail(ListNode* head) {
 	return current;
 }
 
-void swap_nodes(ListNode** node1, ListNode** node2) {
-	ListNode* tmp_prev;
+ListNode* retrieve_head(ListNode* node) {
+	ListNode* current;
 
-	tmp_prev = (*node1)->prev;
-   (*node1)->next = (*node2)->next;
-   (*node1)->prev = (*node2);
-   (*node2)->next = (*node1);
-   (*node2)->prev = tmp_prev;
+	current = node;
+	while(current->prev) {
+		current = current->prev;
+	}
+	return current;
+}
+
+
+void swap_nodes(ListNode* node1, ListNode* node2) {
+	void* tmp;
+
+	tmp = node1->element;
+    node1->element = node2->element;
+	node2->element = tmp;
 }
 
 // Sorts the provided linked list using the provided comparison function and insertion sort
-void ins_sort_list(ListNode** head, int (*cmp_func)(ListNode**, ListNode**)) {
-	ListNode** currenti = head;
-	ListNode** currentj;
+ListNode* ins_sort_list(ListNode* head, int (*cmp_func)(ListNode*, ListNode*)) {
+	ListNode* currenti = head;
+	ListNode* currentj;
 
-	if (*currenti == NULL) {
-		return;
+	if (currenti == NULL) {
+		return head;
 	}
-    while ((*currenti)->next != NULL) {
-		currenti = &((*currenti)->next);
+    while (currenti->next != NULL) {
+		currenti = currenti->next;
 		currentj = currenti;
-    	while ((*currentj)->prev != NULL && cmp_func(currentj, &((*currentj)->prev)) == GREATER_THAN) {
-        	swap_nodes(&((*currentj)->prev), currentj);
-        	currentj = &((*currentj)->prev);
+    	while (currentj->prev != NULL && cmp_func(currentj->prev, currentj) == GREATER_THAN) {
+        	swap_nodes(currentj->prev, currentj);
+        	currentj = currentj->prev;
 		}
 	}
+
+	return head;
 }
 
 ListNode* enqueue(ListNode* queue_head, void* elem_ptr) {

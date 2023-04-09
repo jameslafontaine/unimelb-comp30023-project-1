@@ -8,7 +8,7 @@
 #include "input_parser.h"
 #include "process_manager.h"
 
-#define DEBUG_MODE // comment this line out when you don't want debugging code
+//#define DEBUG_MODE // comment this line out when you don't want debugging code
 				   // to run
 
 #ifdef DEBUG_MODE
@@ -18,7 +18,7 @@
 int main(int argc, char** argv) {
 	char** argvalues = read_args(argc, argv);
 	ProcessList* process_list = read_process_file(argvalues[FPATH]);
-	printf("%s %s %s\n", argvalues[SCHEDULER], argvalues[MEM_MNG], argvalues[QUANTUM]);
+	//printf("%s %s %s\n", argvalues[SCHEDULER], argvalues[MEM_MNG], argvalues[QUANTUM]);
 	run_simulation(argvalues[SCHEDULER], argvalues[MEM_MNG], argvalues[QUANTUM], process_list);
 
 	free(argvalues);
