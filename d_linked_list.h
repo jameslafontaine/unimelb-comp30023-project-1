@@ -53,6 +53,9 @@ ListNode* enqueue(ListNode* queue_head, void* elem_ptr);
 // Remove a process from the start of the provided queue (doesn't return the process)
 ListNode* dequeue(ListNode* queue_head);
 
+// Prints the contents of a linked list
+void print_list(ListNode* head);
+
 /*
    calculates the length of the list starting from the supplied head
  */
@@ -69,13 +72,13 @@ void swap_nodes(ListNode** node1, ListNode** node2);
 void ins_sort_list(ListNode** head, int (*cmp_func)(ListNode**, ListNode**));
 
 /*
-   frees allocated memory for the given node and double checks
+   frees allocated memory for the given node
  */
-void free_node(ListNode* node);
+void free_node(ListNode** node);
 
 /*
-   frees an entire linked list and double checks at each node
+   frees an entire linked list
 */
-void free_list(ListNode* head);
+void free_list(ListNode** head);
 
 #endif

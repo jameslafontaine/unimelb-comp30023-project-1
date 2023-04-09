@@ -60,6 +60,22 @@ char** read_args(int argc, char** argv) {
 		fprintf(stderr, "Malloc failure\n");
 		exit(EXIT_FAILURE);
 	}
+	if (filepath == NULL) {
+		fprintf(stderr, "Error - No filepath provided\n");
+		exit(EXIT_FAILURE);
+	}
+	else if (scheduler == NULL) {
+		fprintf(stderr, "Error - No scheduling method provided\n");
+		exit(EXIT_FAILURE);
+	}
+	else if (mem_mng == NULL) {
+		fprintf(stderr, "Error - No memory management method provided\n");
+		exit(EXIT_FAILURE);
+	}
+	else if (quantum == NULL) {
+		fprintf(stderr, "Error - No quantum provided\n");
+		exit(EXIT_FAILURE);
+	}
 	argvalues[FPATH] = filepath;
 	argvalues[SCHEDULER] = scheduler;
 	argvalues[MEM_MNG] = mem_mng;

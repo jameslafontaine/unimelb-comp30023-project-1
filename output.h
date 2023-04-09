@@ -2,6 +2,8 @@
 #include "process_utils.h"
 
 #define MAX_INFO_LEN 100
+//#define MAX_MEM_DIGITS 4
+//#define MAX_REM_TIME_DIGITS 10
 
 typedef struct event Event;
 struct event {

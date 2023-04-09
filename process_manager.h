@@ -3,6 +3,9 @@
 
 
 #define MAX_MEM 2048
+#define SUCCESS 1
+#define FAIL 0
+
 
 // Compares two processes according to SJF specifications
 int sjf_cmp(ListNode** node1, ListNode** node2);
@@ -14,7 +17,7 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
 // Determine whether the currently running process (if any) has completed.
 // If so it should be terminated and its memory deallocated before
 // subsequent scheduling tasks are performed.
-void check_running_process(Process** running_proc_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, 
+void check_running_process(Process** running_proc_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, 
 ListNode** fnsh_q_head_ptr, int* fnsh_q_len_ptr, unsigned long sim_time, short quantum, char* sched, ListNode** mem_list_ptr, 
 char* mem_mng, ListNode** event_q_head_ptr, int* event_q_len_ptr);
 
@@ -26,6 +29,13 @@ void add_submitted_processes(ListNode** in_q_head_ptr, int* in_q_len_ptr, Proces
 // Move processes from the input queue to the ready queue upon
 // successful memory allocation
 void allocate_memory(ListNode** in_q_head_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, ListNode** mem_list_ptr, char* mem_mng, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr);
+
+// Tries to allocate memory for the given process using best fit, returns success or failure int
+int best_fit_alloc(Process* process, ListNode** mem_list);
+
+
+// Deallocates memory for the given process and joins holes appropriately
+void best_fit_dealloc(Process* process, ListNode** mem_list);
 
 // Remove processes from the ready queue once their service time has elapsed 
 // and deallocate memory

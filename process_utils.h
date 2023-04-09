@@ -19,8 +19,8 @@ struct process {
     char name[MAX_NAME_LEN];
     unsigned long service_time;
     unsigned long rem_service_time;
-    short memory_req;
-    short mem_address;
+    unsigned short memory_req;
+    unsigned short mem_address;
     State state;
     boolean has_mem_alloc;
     unsigned long finish_time;

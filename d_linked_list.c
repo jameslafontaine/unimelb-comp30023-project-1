@@ -13,7 +13,15 @@ ListNode* insert_at_head(ListNode* head, void* element_ptr) {
 	if (!head) {
 		//printf("head==NULL\n");
 		new_head = (ListNode *)  malloc(sizeof(ListNode));
-		assert(new_head);
+		if (new_head == NULL) {
+        	fprintf(stderr, "Malloc failure\n");
+        	exit(EXIT_FAILURE);
+    	}
+		//new_head->element = malloc(sizeof(*element_ptr));
+		//if (new_head->element == NULL) {
+        //	fprintf(stderr, "Malloc failure\n");
+        //	exit(EXIT_FAILURE);
+    	//}
 		new_head->element = element_ptr;
 		new_head->next = NULL;
 		new_head->prev = NULL;
@@ -24,7 +32,15 @@ ListNode* insert_at_head(ListNode* head, void* element_ptr) {
 		//printf("head!=NULL\n");
 		old_head = head;
 		new_head = (ListNode *) malloc(sizeof(ListNode));
-		assert(head);
+		if (new_head == NULL) {
+        	fprintf(stderr, "Malloc failure\n");
+        	exit(EXIT_FAILURE);
+    	}
+		//new_head->element = malloc(sizeof(*element_ptr));
+		//if (new_head->element == NULL) {
+        //	fprintf(stderr, "Malloc failure\n");
+        //	exit(EXIT_FAILURE);
+    	//}
 		new_head->element = element_ptr;
 		new_head->next = old_head;
 		new_head->prev = NULL;
@@ -42,7 +58,15 @@ ListNode* insert_at_tail(ListNode* head, void* element_ptr) {
 	// if head is NULL then the list needs to be initialised
 	if (!head) {
 		new_head = (ListNode *) malloc(sizeof(ListNode));
-		assert(new_head);
+		if (new_head == NULL) {
+        	fprintf(stderr, "Malloc failure\n");
+        	exit(EXIT_FAILURE);
+    	}
+		//new_head->element = malloc(sizeof(*element_ptr));
+		//if (new_head->element == NULL) {
+        //	fprintf(stderr, "Malloc failure\n");
+        //	exit(EXIT_FAILURE);
+    	//}
 		new_head->element = element_ptr;
 		new_head->next = NULL;
 		new_head->prev = NULL;
@@ -52,7 +76,15 @@ ListNode* insert_at_tail(ListNode* head, void* element_ptr) {
 	else {
 		old_tail = retrieve_tail(head);
 		new_tail = (ListNode *) malloc(sizeof(ListNode));
-		assert(new_tail);
+		if (new_tail == NULL) {
+        	fprintf(stderr, "Malloc failure\n");
+        	exit(EXIT_FAILURE);
+    	}
+		//new_tail->element = malloc(sizeof(*element_ptr));
+		//if (new_tail->element == NULL) {
+        //	fprintf(stderr, "Malloc failure\n");
+        //	exit(EXIT_FAILURE);
+    	//}
 		new_tail->element = element_ptr;
 		new_tail->next = NULL;
 		new_tail->prev = old_tail;
@@ -70,7 +102,7 @@ ListNode* remove_head(ListNode* head) {
 	}
 	// if the head is the only element then we can simply remove it
 	else if (!(head->next)) {
-		free_node(head);
+		free_node(&head);
 		return head;
 	}
 	// otherwise we free the current head and point to the next node as the new
@@ -78,10 +110,10 @@ ListNode* remove_head(ListNode* head) {
 	else {
 		new_head = head->next;
 		new_head->prev = NULL;
-		free_node(head);
+		free_node(&head);
+		head = NULL;
+		return new_head;
 	}
-
-	return new_head;
 }
 
 ListNode* remove_tail(ListNode* head) {
@@ -94,15 +126,15 @@ ListNode* remove_tail(ListNode* head) {
 	}
 	// if the head is the tail then remove it
 	else if (!(head->next)) {
-		free_node(head);
+		free_node(&head);
 		return head;
 		// otherwise we find the tail of the list and remove it
 	} else {
 		old_tail = retrieve_tail(head);
 		new_tail = old_tail->prev;
 		new_tail->next = NULL;
-		free_node(old_tail);
-
+		free_node(&old_tail);
+		old_tail = NULL;
 		return head;
 	}
 }
@@ -144,40 +176,52 @@ void ins_sort_list(ListNode** head, int (*cmp_func)(ListNode**, ListNode**)) {
         	currentj = &((*currentj)->prev);
 		}
 	}
-		
 }
-
 
 ListNode* enqueue(ListNode* queue_head, void* elem_ptr) {
     return insert_at_tail(queue_head, elem_ptr);
 }
 
+
 ListNode* dequeue(ListNode* queue_head) {
     return remove_head(queue_head);
 }
 
+void print_list(ListNode* head) {
+	ListNode* current = head;
 
-
-
-
-
-
-void free_node(ListNode* node) {
-	free(node->element);
-	free(node);
-	node = NULL;
-	assert(!node);
+	printf("###################################################################\n");
+	while (current) {
+		printf("current = %p\n", current);
+		printf("current->prev = %p\n", current->prev);
+		printf("current->next = %p\n", current->next);
+		current = current->next;
+	}
+	printf("###################################################################\n");
 }
 
-void free_list(ListNode* head) {
-	ListNode* current = head;
+
+
+
+
+void free_node(ListNode** node) {
+	free((*node)->element);
+	(*node)->element = NULL;
+	free(*node);
+	*node = NULL;
+
+}
+
+void free_list(ListNode** head) {
+	ListNode* current = *head;
 	ListNode* next;
 
   	// iterate through list until the end of the list (NULL) is reached
 	for (next = current; current != NULL; current = next) {
     	// store next pointer before we free
     	next = current->next;
-    	free_node(current);
+    	free_node(&current);
+		current = NULL;
 	}
 }
 

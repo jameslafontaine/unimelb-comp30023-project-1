@@ -38,4 +38,5 @@ const char* translate_state(State state) {
     else if (state == FINISHED_PROCESS) {
         return "FINISHED-PROCESS";
     }
+    return "INVALID";
 }

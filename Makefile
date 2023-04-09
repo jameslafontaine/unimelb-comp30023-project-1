@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall -g 
 ALLOC=allocate
 ALLOC_DEBUG=allocate-debug
 DLL_O=d_linked_list.o
@@ -12,7 +12,7 @@ all: $(ALLOC)
 
 
 $(ALLOC): main.c $(PROC_MAN_O) $(INPUT_O) $(OUTPUT_O) $(PUTILS_O) $(DLL_O)
-	$(CC) $(CFLAGS) -o $(ALLOC) $^
+	$(CC) $(CFLAGS) -o $(ALLOC) $^ -lm
 
 %.o: %.c %.h
 	$(CC) -c -o $@ $< $(CFLAGS)

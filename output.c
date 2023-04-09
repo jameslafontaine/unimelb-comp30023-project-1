@@ -1,15 +1,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "output.h"
 
 
 
 
 void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned long sim_time) {
-    unsigned long ave_turnaround = 0;
-    unsigned long ave_overhead = 0;
-    unsigned long max_overhead = 0;
+    unsigned long total_turnaround = 0;
+    unsigned long current_turnaround = 0;
+    double total_overhead = 0;
+    double current_overhead;
+    double max_overhead = 0;
+    Process* current_process;
+
+    ListNode* current = fnsh_q_head;
+
+    while(current) {
+        current_process = (Process*)(current->element);
+        current_turnaround = current_process->finish_time - current_process->arrival_time;
+        total_turnaround += current_turnaround;
+        current_overhead = (double)current_turnaround / current_process->service_time;
+        total_overhead += current_overhead;
+        if (current_overhead > max_overhead) {
+            max_overhead = current_overhead;
+        }
+        current = current->next;
+    }
+    printf("Turnaround time %d\nTime overhead %.2lf %.2lf\n Makespan %lu", (int)ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
 }
 
 void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time, State state, char proc_name[MAX_NAME_LEN], char info[MAX_INFO_LEN]) {
@@ -23,11 +42,12 @@ void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long 
     strcpy(new_event->proc_name, proc_name);
     strcpy(new_event->info, info);
     
-    *event_q_head_ptr = enqueue(event_q_head_ptr, new_event);
+    *event_q_head_ptr = enqueue(*event_q_head_ptr, new_event);
     *event_q_len_ptr += 1;
 }
 
 void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
+    printf("Printing events...\n");
     if (*event_q_len_ptr > 0) {
         Event next_event;
         static int (*cmp_func)(ListNode**, ListNode**);
