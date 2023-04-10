@@ -8,7 +8,7 @@
 #include <string.h>
 #include "input_parser.h"
 
-//#define DEBUG_MODE
+//#define INDEBUG
 
 // reads the value of each of the command line arguments
 char** read_args(int argc, char** argv) {
@@ -17,7 +17,9 @@ char** read_args(int argc, char** argv) {
     char* scheduler = NULL;
     char* mem_mng = NULL;
     char* quantum = NULL;
+	#ifdef INDEBUG
     int index;
+	#endif
     int c;
 
     opterr = 0;
@@ -48,7 +50,7 @@ char** read_args(int argc, char** argv) {
 	    default:
 		    abort ();
 	  }
-	#ifdef DEBUG_MODE
+	#ifdef INDEBUG
     printf ("filepath = %s, scheduler = %s, mem_mng = %s, quantum = %s\n", filepath, scheduler, mem_mng, quantum);
 
     for (index = optind; index < argc; index++)
@@ -92,15 +94,6 @@ ProcessList* read_process_file(char* filepath) {
 		perror("fopen");
 		exit(EXIT_FAILURE);
 	}
-	// check if the path passed through the command line is relative or absolute
-	/*
-	if (filepath[0] == '/' || filepath[0] == '\\') {
-		// filepath is absolute
-	}
-	else {
-		// filepath is relative
-	}
-	*/
 
 	// Read processes into memory
 	size_t processes_len = 0, processes_size = 2;
@@ -131,7 +124,7 @@ ProcessList* read_process_file(char* filepath) {
 	}
 
 	// Print values
-	#ifdef DEBUG_MODE
+	#ifdef INDEBUG
 	for (int i=0; i < processes_len; i++) {
 		Process example = processes[i];
 		printf("%lu %s %lu %hd\n", example.arrival_time, example.name, example.service_time, example.memory_req);

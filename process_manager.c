@@ -105,11 +105,6 @@ short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** e
             //free(*running_proc_ptr);
             //print_process((retrieve_tail(*fnsh_q_head_ptr))->element);
         }
-        // if we are using round robin scheduling then unless this is the only ready process, we must preempt it
-        else if (strcmp(sched, "RR") == EQUAL && *rdy_q_len_ptr > 0) {
-            int dummy_len = 0;
-            transition_process(running_head_ptr, &dummy_len, rdy_q_head_ptr, rdy_q_len_ptr, READY);
-        }
         return;
     }
 }
@@ -191,8 +186,8 @@ void allocate_memory(ListNode** in_q_head_ptr, int* in_q_len_ptr, ListNode** rdy
 }
 
 int best_fit_alloc(Process* process, ListNode** mem_list) {
-    unsigned short smallest_hole_size = MAX_MEM + 1;
-    ListNode* smallest_hole = NULL;
+    //unsigned short smallest_hole_size = MAX_MEM + 1;
+    //ListNode* smallest_hole = NULL;
 
     // iterate through memory list until reach end and track smallest hole that is greater
     // than or equal to memory requirement of process
@@ -254,10 +249,14 @@ void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, in
         //print_list(*rdy_q_head_ptr);
         run_process(running_head_ptr, rdy_q_head_ptr, rdy_q_len_ptr, event_q_head_ptr, event_q_len_ptr, sim_time);
     }
-    // if the scheduling method is round robin then simply let the next process in the ready queue run
-    else if (strcmp(sched, "RR") == EQUAL && *rdy_q_len_ptr > 0) {
+    // if the scheduling method is round robin then simply let the next process in the ready queue run if
+    // there is one by preempting the currently running process, otherwise give more CPU time to the currently running process
+    else if (strcmp(sched, "RR") == EQUAL && *rdy_q_len_ptr > 0 ) {
+        if (*running_head_ptr != NULL) {
+            int dummy_len = 0;
+            transition_process(running_head_ptr, &dummy_len, rdy_q_head_ptr, rdy_q_len_ptr, READY);
+        }
         run_process(running_head_ptr, rdy_q_head_ptr, rdy_q_len_ptr, event_q_head_ptr, event_q_len_ptr, sim_time);
-        
     }
     else if (strcmp(sched, "SJF") != EQUAL && strcmp(sched, "RR") != EQUAL) {
         fprintf(stderr, "Invalid scheduling method\n");
