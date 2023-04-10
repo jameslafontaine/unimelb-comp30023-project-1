@@ -12,7 +12,7 @@ typedef int boolean;
 
 
 typedef struct process Process;
-typedef enum { READY = 2, RUNNING = 3, FINISHED = 0, FINISHED_PROCESS = 1} State;
+typedef enum { READY = 2, RUNNING = 3, FINISHED = 0, FINISHED_PROCESS = 1, WAITING = -1} State;
 
 struct process {
     unsigned long arrival_time;

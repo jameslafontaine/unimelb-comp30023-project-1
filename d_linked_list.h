@@ -77,9 +77,10 @@ void swap_nodes(ListNode* node1, ListNode* node2);
 // Sorts the provided linked list using the provided comparison function and insertion sort
 ListNode* ins_sort_list(ListNode* head, int (*cmp_func)(ListNode*, ListNode*));
 
-
+/*
 // Transfers the head of list1 to the tail of list2
 void transfer_node(ListNode** head1, ListNode** head2);
+*/
 
 /*
    frees allocated memory for the given node

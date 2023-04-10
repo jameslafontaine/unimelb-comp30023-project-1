@@ -211,10 +211,11 @@ void print_list(ListNode* head) {
 	printf("###################################################################\n");
 }
 
+/*
 void transfer_node(ListNode** head1, ListNode** head2) {
 	
 }
-
+*/
 
 
 void free_node(ListNode** node) {
@@ -223,7 +224,7 @@ void free_node(ListNode** node) {
 	free(*node);
 	*node = NULL;
 
-}
+} 
 
 void free_list(ListNode** head) {
 	ListNode* current = *head;

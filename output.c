@@ -4,6 +4,8 @@
 #include <math.h>
 #include "output.h"
 
+//#define OUTDEBUG
+
 
 
 
@@ -49,7 +51,10 @@ void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long 
 }
 
 void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
-    //printf("Printing events...\n");
+    
+    #ifdef OUTDEBUG
+    printf("Printing events...\n");
+    #endif
     if (*event_q_len_ptr > 0) {
         Event next_event;
         static int (*cmp_func)(ListNode*, ListNode*);

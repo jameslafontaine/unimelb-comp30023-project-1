@@ -17,7 +17,7 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
 // Determine whether the currently running process (if any) has completed.
 // If so it should be terminated and its memory deallocated before
 // subsequent scheduling tasks are performed.
-void check_running_process(Process** running_proc_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, 
+void check_running_process(ListNode** running_head_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, 
 ListNode** fnsh_q_head_ptr, int* fnsh_q_len_ptr, unsigned long sim_time, short quantum, char* sched, ListNode** mem_list_ptr, 
 char* mem_mng, ListNode** event_q_head_ptr, int* event_q_len_ptr);
 
@@ -39,14 +39,18 @@ void best_fit_dealloc(Process* process, ListNode** mem_list);
 
 // Remove processes from the ready queue once their service time has elapsed 
 // and deallocate memory
-void deallocate_memory(Process** running_proc_ptr, ListNode** mem_list_ptr, char* mem_mng);
+void deallocate_memory(ListNode** running_head_ptr, ListNode** mem_list_ptr, char* mem_mng);
 
 // Determine the process (if any) which runs in this cycle. Depending on the 
 // scheduling algorithm, this could be the process that was previously running,
 // a resumed process that was previously placed back into the ready queue,
 // or a READY process which has not previously executed
-void schedule_process(Process** running_proc_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, char* sched, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr);
+void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, char* sched, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr);
 
 // Performs the necessary steps to begin running the next process in the ready queue
-void start_running(Process** running_proc_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr);
+void run_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time);
+
+// Moves a process from one queue to another
+Process* transition_process(ListNode** source_head_ptr, int* source_len_ptr, ListNode** dest_head_ptr, int* dest_len_ptr, State state);
+
 
