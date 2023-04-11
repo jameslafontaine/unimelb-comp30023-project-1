@@ -30,6 +30,9 @@ ListNode* insert_at_head(ListNode* head, void* element_ptr);
  */
 ListNode* insert_at_tail(ListNode* head, void* element_ptr);
 
+/*  */
+ListNode* insert_after_node(ListNode* node, void* element_ptr);
+
 /*
    removes the node at the head of the linked list and returns the new head
    pointer

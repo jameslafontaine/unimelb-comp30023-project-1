@@ -32,7 +32,7 @@ void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned
         }
         current = current->next;
     }
-    printf("Turnaround time %d\nTime overhead %.2lf %.2lf\nMakespan %lu\n", (int)ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
+    printf("Turnaround time %lu\nTime overhead %.2lf %.2lf\nMakespan %lu\n", (unsigned long) ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
 }
 
 void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time, State state, char proc_name[MAX_NAME_LEN], char info[MAX_INFO_LEN]) {

@@ -6,9 +6,20 @@
 #define SUCCESS 1
 #define FAIL 0
 
+typedef enum { HOLE = 0, PROCESS = 1} BlockType;
+typedef struct memory_block MemoryBlock;
+
+struct memory_block {
+    BlockType type;
+    unsigned short start_address;
+    unsigned short length;
+};
+
 
 // Compares two processes according to SJF specifications
 int sjf_cmp(ListNode* node1, ListNode* node2);
+
+ListNode* initialise_memory(ListNode* mem_list_head);
 
 // Run the simulation of the process manager
 void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_list);
@@ -52,5 +63,7 @@ void run_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, int* rd
 
 // Moves a process from one queue to another
 Process* transition_process(ListNode** source_head_ptr, int* source_len_ptr, ListNode** dest_head_ptr, int* dest_len_ptr, State state);
+
+void print_memory_block(MemoryBlock* mem_block);
 
 

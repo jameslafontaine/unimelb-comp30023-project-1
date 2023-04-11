@@ -103,7 +103,7 @@ ProcessList* read_process_file(char* filepath) {
 		exit(EXIT_FAILURE);
 	}
 	unsigned long col1, col3;
-	short col4;
+	unsigned short col4;
 	char col2[MAX_NAME_LEN];
 	while (fscanf(fp, "%lu %s %lu %hd", &col1, col2, &col3, &col4) == 4) {
 		//printf("%lu %s %lu %hd\n", col1, col2, col3, col4);

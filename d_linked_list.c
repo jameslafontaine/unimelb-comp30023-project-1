@@ -94,6 +94,46 @@ ListNode* insert_at_tail(ListNode* head, void* element_ptr) {
 	}
 }
 
+ListNode* insert_after_node(ListNode* node, void* element_ptr) {
+	ListNode* new_node = NULL;
+
+	// return the the new node if the provided node doesn't exist (i.e. the list is empty)
+	if (node == NULL) {
+		new_node = (ListNode *) malloc(sizeof(ListNode));
+		if (new_node== NULL) {
+        	fprintf(stderr, "Malloc failure\n");
+        	exit(EXIT_FAILURE);
+    	}
+		//new_head->element = malloc(sizeof(*element_ptr));
+		//if (new_head->element == NULL) {
+        //	fprintf(stderr, "Malloc failure\n");
+        //	exit(EXIT_FAILURE);
+    	//}
+		new_node->element = element_ptr;
+		new_node->next = NULL;
+		new_node->prev = NULL;
+		return new_node;
+	}
+	// otherwise insert the new node after the provided node
+	else {
+		new_node = (ListNode *) malloc(sizeof(ListNode));
+		if (new_node== NULL) {
+        	fprintf(stderr, "Malloc failure\n");
+        	exit(EXIT_FAILURE);
+    	}
+		new_node->element = element_ptr;
+		new_node->next = node->next;
+		new_node->prev = node;
+		node->next = new_node;
+		if (new_node->next != NULL) {
+			(new_node->next)->prev = new_node;
+		}
+
+		return node;
+	}
+	
+}
+
 ListNode* remove_head(ListNode* head) {
 	ListNode* new_head;
 	// if head is NULL then do nothing
