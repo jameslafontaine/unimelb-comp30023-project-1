@@ -1,0 +1,8 @@
+0 P1 50 2048
+10 P2 50 512
+20 P3 50 512
+30 P4 40 512
+100 P5 60 1024
+
+# try to test hole joining in both directions, and cases where memory blocks are on
+# edge of memory list (i.e. prev = NULL and next = NULL)

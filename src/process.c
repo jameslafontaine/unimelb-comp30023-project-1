@@ -5,7 +5,7 @@
 	https://www.gnu.org/software/libc/manual/html_node/Feature-Test-Macros.html
 	Comments deliberately kept sparse and brief
 	Please report any issues on Ed
-	Last updated 21/03/23
+	Last updated 10/04/23
 */
 
 #define _POSIX_C_SOURCE 1
@@ -162,8 +162,8 @@ void store(uint8_t* buf, size_t len, uint8_t* dest, size_t* dest_index) {
 void store_process_name(const char* process_name, uint8_t hash_content[128],
 						size_t* dest_index) {
 	if (verbose_flag) {
-		fprintf(stderr, "[process.c (%ld)] started with process name %s\n", pid,
-				process_name);
+		fprintf(stderr, "[process.c (%ld)] started with process name %s\n",
+				pid, process_name);
 	}
 	store((uint8_t*)process_name, strlen(process_name), hash_content,
 		  dest_index);
@@ -218,12 +218,15 @@ void read_store_dword(Op op, uint8_t hash_content[128], size_t* dest_index) {
 		}
 		fsync(STDOUT_FILENO);
 		fflush(stdout);
+
+		if (verbose_flag) {
+			fprintf(stderr,
+					"[process.c (%ld)] wrote hex byte [%02x] to stdout\n", pid,
+					buf[4]);
+			fflush(stderr);
+		}
 	}
-	if (verbose_flag) {
-		fprintf(stderr, "[process.c (%ld)] wrote hex byte [%02x] to stdout\n",
-				pid, buf[4]);
-		fflush(stderr);
-	}
+
 	store(buf, 5, hash_content, dest_index);
 }
 
@@ -236,21 +239,24 @@ void read_store_dword(Op op, uint8_t hash_content[128], size_t* dest_index) {
 #define SHA_Maj(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
 #define SHA256_SHR(bits, word) ((word) >> (bits))
-#define SHA256_ROTL(bits, word) (((word) << (bits)) | ((word) >> (32 - (bits))))
-#define SHA256_ROTR(bits, word) (((word) >> (bits)) | ((word) << (32 - (bits))))
+#define SHA256_ROTL(bits, word)                                               \
+	(((word) << (bits)) | ((word) >> (32 - (bits))))
+#define SHA256_ROTR(bits, word)                                               \
+	(((word) >> (bits)) | ((word) << (32 - (bits))))
 
-#define SHA256_BSIG0(word)                                                     \
+#define SHA256_BSIG0(word)                                                    \
 	(SHA256_ROTR(2, word) ^ SHA256_ROTR(13, word) ^ SHA256_ROTR(22, word))
-#define SHA256_BSIG1(word)                                                     \
+#define SHA256_BSIG1(word)                                                    \
 	(SHA256_ROTR(6, word) ^ SHA256_ROTR(11, word) ^ SHA256_ROTR(25, word))
-#define SHA256_SSIG0(word)                                                     \
+#define SHA256_SSIG0(word)                                                    \
 	(SHA256_ROTR(7, word) ^ SHA256_ROTR(18, word) ^ SHA256_SHR(3, word))
-#define SHA256_SSIG1(word)                                                     \
+#define SHA256_SSIG1(word)                                                    \
 	(SHA256_ROTR(17, word) ^ SHA256_ROTR(19, word) ^ SHA256_SHR(10, word))
 
 /* SHA-256 Initial Hash Values: FIPS 180-3 section 5.3.3 */
-static uint32_t SHA256_H0[8] = {0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
-								0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19};
+static uint32_t SHA256_H0[8] = {0x6A09E667, 0xBB67AE85, 0x3C6EF372,
+								0xA54FF53A, 0x510E527F, 0x9B05688C,
+								0x1F83D9AB, 0x5BE0CD19};
 
 /* SHA-256 Constants: FIPS 180-3, section 4.2.2 */
 static const uint32_t K[64] = {
@@ -332,13 +338,12 @@ void sha256_process(uint32_t message_block[16], uint32_t hash[8]) {
 	/* prepare message schedule */
 	for (t = 0; t < 64; t++) {
 		if (t < 16) {
-			/* w[t] = ntohl(message_block[t]); */
 			message_ptr = (uint8_t*)&message_block[t];
 			w[t] = message_ptr[0] << 24 | message_ptr[1] << 16 |
 				   message_ptr[2] << 8 | message_ptr[3];
 		} else {
-			w[t] = SHA256_SSIG1(w[t - 2]) + w[t - 7] + SHA256_SSIG0(w[t - 15]) +
-				   w[t - 16];
+			w[t] = SHA256_SSIG1(w[t - 2]) + w[t - 7] +
+				   SHA256_SSIG0(w[t - 15]) + w[t - 16];
 		}
 	}
 
@@ -392,11 +397,6 @@ void sha256_process_final(uint64_t nbyte, short leftover_bytes,
 	}
 
 	/* Set length, process last block */
-	/*
-		((uint64_t*)last_block)[7] = htobe64(nbyte * 8);
-		last_block[14] = htonl(nbyte * 8 >> 32);
-		last_block[15] = htonl(nbyte * 8 & 0xFFFFFFF0);
-	*/
 	((uint8_t*)last_block)[56] = (nbyte * 8 >> (64 - 8)) & 0xFF;
 	((uint8_t*)last_block)[57] = (nbyte * 8 >> (64 - 16)) & 0xFF;
 	((uint8_t*)last_block)[58] = (nbyte * 8 >> (64 - 24)) & 0xFF;
@@ -416,12 +416,13 @@ void print_uint32_array(uint32_t* arr, unsigned long length) {
 	for (i = 0; i < length; i++) {
 		fprintf(stderr, "%08x", arr[i]);
 	}
-	sprintf(stderr, "\n");
+	fprintf(stderr, "\n");
 }
 #endif
 
 /* Returns a uint32 array in hex notation */
-void uint32_array_to_hex_string(char* out, uint32_t* in, unsigned long length) {
+void uint32_array_to_hex_string(char* out, uint32_t* in,
+								unsigned long length) {
 	int i;
 	for (i = 0; i < length; i++) {
 		sprintf(out + (i * 8), "%08x", in[i]);
