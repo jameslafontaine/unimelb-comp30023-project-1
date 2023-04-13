@@ -1,6 +1,7 @@
 #include "process_utils.h"
 #include "d_linked_list.h"
 
+#define IMPLEMENTS_REAL_PROCESS
 
 #define MAX_MEM 2048
 #define SUCCESS 1
@@ -66,4 +67,23 @@ Process* transition_process(ListNode** source_head_ptr, int* source_len_ptr, Lis
 
 void print_memory_block(MemoryBlock* mem_block);
 
+#ifdef IMPLEMENTS_REAL_PROCESS
+
+void create_real_process(Process* proc, unsigned long sim_time);
+
+void suspend_real_process(Process* proc, unsigned long sim_time);
+
+void continue_real_process(Process* proc, unsigned long sim_time);
+
+void resume_real_process(Process* proc, unsigned long sim_time);
+
+void terminate_real_process(Process* proc, unsigned long sim_time);
+
+void send_32bit_sim_time(unsigned long sim_time, int mngr_write);
+
+void verify_byte(unsigned long sim_time, int mngr_read);
+
+void big_endian_reorder(u_int8_t* bytes);
+
+#endif
 

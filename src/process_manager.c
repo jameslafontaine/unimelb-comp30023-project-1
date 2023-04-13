@@ -1,8 +1,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "process_manager.h"
 #include "output.h"
+
+//#define IMPLEMENTS_REAL_PROCESS
+#ifdef IMPLEMENTS_REAL_PROCESS
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <unistd.h>
+#endif
 
 //#define PMDEBUG
 
@@ -53,7 +62,7 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
     calculate_performance_stats(fnsh_queue_head, fnsh_queue_len, simulation_time);
     free_list(&in_queue_head);
     free_list(&rdy_queue_head);
-    free_list(&running_head);
+    free_list(&running_head); 
     free_list(&fnsh_queue_head);
 
     #ifdef PMDEBUG
@@ -112,12 +121,19 @@ short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** e
             running_proc->finish_time = sim_time;
             //print_process(*running_proc_ptr);
             // convert remaining time to string for event printing
-            char remaining_time[MAX_INFO_LEN];
-            sprintf(remaining_time, "%d", *rdy_q_len_ptr + *in_q_len_ptr);
-            add_event(event_q_head_ptr, event_q_len_ptr, sim_time, running_proc->state, running_proc->name, remaining_time);
+            char remaining_procs[MAX_INFO_LEN];
+            sprintf(remaining_procs, "%d", *rdy_q_len_ptr + *in_q_len_ptr);
+            add_event(event_q_head_ptr, event_q_len_ptr, sim_time, running_proc->state, running_proc->name, remaining_procs);
+
+            #ifdef IMPLEMENTS_REAL_PROCESS
+            // terminate process and retrieve the sha value
+            terminate_real_process(running_proc, sim_time);
+            add_event(event_q_head_ptr, event_q_len_ptr, sim_time, FINISHED_PROCESS, running_proc->name, running_proc->sha);
+            #endif
+
             //free(*running_proc_ptr);
             //print_process((retrieve_tail(*fnsh_q_head_ptr))->element);
-        }
+        } 
         return;
     }
 }
@@ -298,6 +314,27 @@ int best_fit_alloc(Process* process, ListNode** mem_list) {
     }
 }
 
+// Deallocate memory for a finished process
+void deallocate_memory(ListNode** running_head_ptr, ListNode** mem_list, char* mem_mng) {
+
+    #ifdef PMDEBUG
+    printf("Deallocating memory...\n");
+    #endif
+
+    // if the memory allocation method is infinite then no memory needs to be deallocated
+    if (strcmp(mem_mng, "infinite") == EQUAL) {
+        return;
+    }
+    // if the memory allocation method is best-fit then move the finished process to the finished queue 
+    // and deallocate memory by checking if holes need to be joined and updating the memory linked list
+    else if (strcmp(mem_mng, "best-fit") == EQUAL) {
+        best_fit_dealloc((Process *)(*running_head_ptr)->element, mem_list);
+    }
+    else {
+        fprintf(stderr, "Invalid memory allocation method\n");
+		exit(EXIT_FAILURE);
+    }
+}
 
 // remove process from memory list and join holes as needed
 void best_fit_dealloc(Process* process, ListNode** mem_list) {
@@ -369,28 +406,6 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
 
 
 
-// Deallocate memory for a finished process
-void deallocate_memory(ListNode** running_head_ptr, ListNode** mem_list, char* mem_mng) {
-
-    #ifdef PMDEBUG
-    printf("Deallocating memory...\n");
-    #endif
-
-    // if the memory allocation method is infinite then no memory needs to be deallocated
-    if (strcmp(mem_mng, "infinite") == EQUAL) {
-        return;
-    }
-    // if the memory allocation method is best-fit then move the finished process to the finished queue 
-    // and deallocate memory by checking if holes need to be joined and updating the memory linked list
-    else if (strcmp(mem_mng, "best-fit") == EQUAL) {
-        best_fit_dealloc((Process *)(*running_head_ptr)->element, mem_list);
-    }
-    else {
-        fprintf(stderr, "Invalid memory allocation method\n");
-		exit(EXIT_FAILURE);
-    }
-}
-
 // Determine the process (if any) which runs in this cycle. Depending on the 
 // scheduling algorithm, this could be the process that was previously running,
 // a resumed process that was previously placed back into the ready queue,
@@ -413,20 +428,55 @@ void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, in
         *rdy_q_head_ptr = ins_sort_list(*rdy_q_head_ptr, cmp_func);
         //print_list(*rdy_q_head_ptr);
         run_process(running_head_ptr, rdy_q_head_ptr, rdy_q_len_ptr, event_q_head_ptr, event_q_len_ptr, sim_time);
+
+        #ifdef IMPLEMENTS_REAL_PROCESS
+        // create a real process using process.c as this must be the process' first time running
+        create_real_process((Process *) (*running_head_ptr)->element, sim_time);
+        #endif
     }
     // if the scheduling method is round robin then simply let the next process in the ready queue run if
     // there is one by preempting the currently running process, otherwise give more CPU time to the currently running process
     else if (strcmp(sched, "RR") == EQUAL && *rdy_q_len_ptr > 0 ) {
         if (*running_head_ptr != NULL) {
+            
+            #ifdef IMPLEMENTS_REAL_PROCESS
+            // suspend the currently running process
+            suspend_real_process((Process *) (*running_head_ptr)->element, sim_time);
+            #endif
+
             int dummy_len = 0;
             transition_process(running_head_ptr, &dummy_len, rdy_q_head_ptr, rdy_q_len_ptr, READY);
         }
         run_process(running_head_ptr, rdy_q_head_ptr, rdy_q_len_ptr, event_q_head_ptr, event_q_len_ptr, sim_time);
+
+        #ifdef IMPLEMENTS_REAL_PROCESS
+        // create a real process using process.c if this is the process' first time running
+        Process* running_proc = (Process *) (*running_head_ptr)->element;
+        if (running_proc->service_time == running_proc->rem_service_time) {
+            create_real_process(running_proc, sim_time);
+        }
+        // otherwise the process is being resumed
+        else {
+            resume_real_process(running_proc, sim_time);
+        }
+        #endif
+        
     }
     else if (strcmp(sched, "SJF") != EQUAL && strcmp(sched, "RR") != EQUAL) {
         fprintf(stderr, "Invalid scheduling method\n");
 		exit(EXIT_FAILURE);
     }
+
+    #ifdef IMPLEMENTS_REAL_PROCESS
+    // if we are letting the currently running process have more CPU time then it is being continued
+    if (strcmp(sched, "SJF") == EQUAL && *running_head_ptr != NULL) {
+        continue_real_process((Process *) (*running_head_ptr)->element, sim_time);
+    } 
+    else if ((strcmp(sched, "RR") == EQUAL && *running_head_ptr != NULL && *rdy_q_len_ptr == 0 )) {
+        continue_real_process((Process *) (*running_head_ptr)->element, sim_time);
+    }
+    #endif
+
 }
 
 
@@ -503,3 +553,157 @@ void print_memory_block(MemoryBlock* mem_block) {
     printf("mem_block->length = %hu\n", mem_block->length);
     printf("###################################\n");
 }
+
+#ifdef IMPLEMENTS_REAL_PROCESS
+
+void create_real_process(Process* proc, unsigned long sim_time) {
+    int fd1[2];
+    int fd2[2];
+    char* args[] = {"-v", proc->name,  NULL};
+    pid_t childpid;
+    if (pipe(fd1) == -1) {
+        printf("Pipe error\n");
+        exit(EXIT_FAILURE);
+    }
+    if (pipe(fd2) == -1) {
+        printf("Pipe error\n");
+        exit(EXIT_FAILURE);
+    }
+    proc->proc_read = fd2[0];
+    proc->proc_write = fd1[1];
+    proc->mngr_read = fd1[0];
+    proc->mngr_write = fd2[1];
+
+    int proc_read = proc->proc_read;
+    int proc_write = proc->proc_write;
+    int mngr_read = proc->mngr_read;
+    int mngr_write = proc->mngr_write;
+
+    if ((childpid = fork()) == -1) {
+        perror("Fork error\n");
+        exit(EXIT_FAILURE);
+    }
+    // real process
+    if (childpid == 0) {
+        close(mngr_read); // Close the unwanted read side
+        close(mngr_write); // Close the unwanted write side
+        dup2(proc_read, STDIN_FILENO);
+        dup2(proc_write, STDOUT_FILENO);
+        execv("process", args);
+    }
+    // process manager
+    else {
+        proc->pid = childpid;
+        close(proc_write); // Close the unwanted write side
+        close(proc_read); // Close the unwanted read side
+        send_32bit_sim_time(sim_time, mngr_write);
+        verify_byte(sim_time, mngr_read);
+    }
+}
+
+void suspend_real_process(Process* proc, unsigned long sim_time) {
+    int mngr_write = proc->mngr_write;
+   
+    send_32bit_sim_time(sim_time, mngr_write);
+    //printf("\\%02x\\%02x\\%02x\\%02x\n", bytes[0], bytes[1], bytes[2], bytes[3]);
+
+    kill(proc->pid, SIGTSTP);
+    int wstatus;
+    while (!WIFSTOPPED(wstatus)) {
+        if (waitpid(proc->pid, &wstatus, WUNTRACED) != -1) {
+            if (WIFSTOPPED(wstatus)) {
+                return;
+            }
+            else {
+                //printf("WEXITSTATUS = %d\n", WEXITSTATUS(wstatus));
+            }
+        }
+        else {
+            printf("waitpid error\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+void continue_real_process(Process* proc, unsigned long sim_time) {
+    int mngr_read = proc->mngr_read;
+    int mngr_write = proc->mngr_write;
+   
+    send_32bit_sim_time(sim_time, mngr_write);
+    //printf("\\%02x\\%02x\\%02x\\%02x\n", bytes[0], bytes[1], bytes[2], bytes[3]);
+
+    kill(proc->pid, SIGCONT);
+    verify_byte(sim_time, mngr_read);
+
+}
+
+void resume_real_process(Process* proc, unsigned long sim_time) {
+    continue_real_process(proc, sim_time);
+}
+
+void terminate_real_process(Process* proc, unsigned long sim_time) {
+    int mngr_read = proc->mngr_read;
+    int mngr_write = proc->mngr_write;
+   
+    char sha[MAX_INFO_LEN];
+    send_32bit_sim_time(sim_time, mngr_write);
+    //printf("\\%02x\\%02x\\%02x\\%02x\n", bytes[0], bytes[1], bytes[2], bytes[3]);
+
+    kill(proc->pid, SIGTERM);
+    int wstatus;
+    while (!WIFEXITED(wstatus)) {
+        if (waitpid(proc->pid, &wstatus, WUNTRACED) != -1) {
+            if (WIFEXITED(wstatus)) {
+                //printf("WTERMSIG = %d\n", WTERMSIG(wstatus));
+                read(mngr_read, sha, 64);
+                sha[64] = '\0';
+                strcpy(proc->sha, sha);
+            }
+            else {
+                //printf("WEXITSTATUS = %d\n", WEXITSTATUS(wstatus));
+            }
+        }
+        else {
+            printf("waitpid error\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+}
+
+void send_32bit_sim_time(unsigned long sim_time, int mngr_write) {
+    u_int8_t bytes[4];
+    *(u_int32_t *) bytes = sim_time;
+    big_endian_reorder(bytes);
+    write(mngr_write, bytes, sizeof(bytes));
+}
+
+void verify_byte(unsigned long sim_time, int mngr_read) {
+    u_int8_t bytes[4];
+    *(u_int32_t *) bytes = sim_time;
+    big_endian_reorder(bytes);
+    char buf[4];
+    read(mngr_read, buf, 1);
+    //printf("\\%02x\n", *(u_int8_t *) buf);
+    //printf("\\%02x\n", bytes[3]);
+    if (*(u_int8_t *) buf != bytes[3]) {
+        printf("Error - Least significant byte does not match\n");
+        exit(EXIT_FAILURE);
+    } 
+}
+
+void big_endian_reorder(u_int8_t* bytes) {
+
+    u_int8_t tmp;
+    // reorder into Big Endian Byte Ordering
+    tmp = bytes[0];
+    bytes[0] = bytes[3];
+    bytes[3] = tmp;
+    tmp = bytes[1];
+    bytes[1] = bytes[2];
+    bytes[2] = tmp;
+
+}
+
+
+#endif

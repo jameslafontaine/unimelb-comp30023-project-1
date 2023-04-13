@@ -1,14 +1,17 @@
 #ifndef PROC_UTILS_INCLUDED
 #define PROC_UTILS_INCLUDED
 
-
+#define IMPLEMENTS_REAL_PROCESS_UTILS
+#ifdef IMPLEMENTS_REAL_PROCESS_UTILS
+#define SHA_LEN 100
+#endif
 
 #define MAX_NAME_LEN 9
 #define ALLOCATED 1
 
 typedef int boolean;
 #define true 1
-#define false 0
+#define false 0 
 
 
 typedef struct process Process;
@@ -25,6 +28,15 @@ struct process {
     boolean has_mem_alloc;
     unsigned long finish_time;
     unsigned long turnaround;
+    #ifdef IMPLEMENTS_REAL_PROCESS_UTILS
+    int proc_read;
+    int proc_write;
+    int mngr_read;
+    int mngr_write;
+    int pid;
+    char sha[SHA_LEN];
+    #endif
+
 };
 
 typedef struct process_list ProcessList;
