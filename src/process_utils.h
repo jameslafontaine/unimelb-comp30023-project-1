@@ -3,7 +3,7 @@
 
 #define IMPLEMENTS_REAL_PROCESS_UTILS
 #ifdef IMPLEMENTS_REAL_PROCESS_UTILS
-#define SHA_LEN 100
+#define SHA_LEN 65
 #endif
 
 #define MAX_NAME_LEN 9
@@ -35,6 +35,7 @@ struct process {
     int mngr_write;
     int pid;
     char sha[SHA_LEN];
+    boolean run_1_quantum;
     #endif
 
 };

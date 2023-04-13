@@ -83,7 +83,7 @@ void send_32bit_sim_time(unsigned long sim_time, int mngr_write);
 
 void verify_byte(unsigned long sim_time, int mngr_read);
 
-void big_endian_reorder(u_int8_t* bytes);
+void convert_big_endian(unsigned long sim_time, u_int8_t bytes[4]);
 
 #endif
 

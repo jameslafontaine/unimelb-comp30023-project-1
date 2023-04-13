@@ -11,9 +11,10 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #endif
 
-//#define PMDEBUG
+// #define PMDEBUG
 
 void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_list) {
     unsigned long simulation_time = 0;
@@ -109,6 +110,11 @@ short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** e
         else {
             running_proc->rem_service_time -= quantum;
         }
+
+        #ifdef IMPLEMENTS_REAL_PROCESS
+        running_proc->run_1_quantum = true;
+        #endif
+
         #ifdef PMDEBUG
         printf("Remaining service time for current process - %lu\n", running_proc->rem_service_time);
         #endif
@@ -468,13 +474,17 @@ void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, in
     }
 
     #ifdef IMPLEMENTS_REAL_PROCESS
-    // if we are letting the currently running process have more CPU time then it is being continued
-    if (strcmp(sched, "SJF") == EQUAL && *running_head_ptr != NULL) {
-        continue_real_process((Process *) (*running_head_ptr)->element, sim_time);
-    } 
-    else if ((strcmp(sched, "RR") == EQUAL && *running_head_ptr != NULL && *rdy_q_len_ptr == 0 )) {
-        continue_real_process((Process *) (*running_head_ptr)->element, sim_time);
-    }
+    // if we are letting the currently running process have more CPU time then it is being continued, (except
+    // for the cycle on which it was created or resumed running)
+    else if (*running_head_ptr != NULL) {
+        Process* running_proc = (Process *) ((*running_head_ptr)->element);
+        if (strcmp(sched, "SJF") == EQUAL && running_proc->run_1_quantum) {
+            continue_real_process((Process *) (*running_head_ptr)->element, sim_time);
+        }
+        else if ((strcmp(sched, "RR") == EQUAL && *rdy_q_len_ptr == 0 && running_proc->run_1_quantum)) {
+            continue_real_process((Process *) (*running_head_ptr)->element, sim_time);
+        }
+    }    
     #endif
 
 }
@@ -557,6 +567,9 @@ void print_memory_block(MemoryBlock* mem_block) {
 #ifdef IMPLEMENTS_REAL_PROCESS
 
 void create_real_process(Process* proc, unsigned long sim_time) {
+    #ifdef PMDEBUG
+    printf("Creating process...\n");
+    #endif
     int fd1[2];
     int fd2[2];
     char* args[] = {"-v", proc->name,  NULL};
@@ -573,6 +586,7 @@ void create_real_process(Process* proc, unsigned long sim_time) {
     proc->proc_write = fd1[1];
     proc->mngr_read = fd1[0];
     proc->mngr_write = fd2[1];
+    proc->run_1_quantum = false;
 
     int proc_read = proc->proc_read;
     int proc_write = proc->proc_write;
@@ -602,30 +616,36 @@ void create_real_process(Process* proc, unsigned long sim_time) {
 }
 
 void suspend_real_process(Process* proc, unsigned long sim_time) {
+    #ifdef PMDEBUG
+    printf("Suspending process...\n");
+    #endif
     int mngr_write = proc->mngr_write;
-   
+    proc->run_1_quantum = false;
+
     send_32bit_sim_time(sim_time, mngr_write);
     //printf("\\%02x\\%02x\\%02x\\%02x\n", bytes[0], bytes[1], bytes[2], bytes[3]);
 
     kill(proc->pid, SIGTSTP);
     int wstatus;
-    while (!WIFSTOPPED(wstatus)) {
-        if (waitpid(proc->pid, &wstatus, WUNTRACED) != -1) {
-            if (WIFSTOPPED(wstatus)) {
-                return;
-            }
-            else {
-                //printf("WEXITSTATUS = %d\n", WEXITSTATUS(wstatus));
-            }
-        }
-        else {
-            printf("waitpid error\n");
+    pid_t w;
+    do {
+        w = waitpid(proc->pid, &wstatus, WUNTRACED);
+        if (w == -1) {
+            perror("waitpid error\n");
             exit(EXIT_FAILURE);
         }
-    }
+
+        if (WIFSTOPPED(wstatus)) {
+            return;
+        }
+    } while (!WIFSTOPPED(wstatus)); 
+    
 }
 
 void continue_real_process(Process* proc, unsigned long sim_time) {
+    #ifdef PMDEBUG
+    printf("Continuing process...\n");
+    #endif
     int mngr_read = proc->mngr_read;
     int mngr_write = proc->mngr_write;
    
@@ -634,54 +654,65 @@ void continue_real_process(Process* proc, unsigned long sim_time) {
 
     kill(proc->pid, SIGCONT);
     verify_byte(sim_time, mngr_read);
-
 }
 
 void resume_real_process(Process* proc, unsigned long sim_time) {
+    #ifdef PMDEBUG
+    printf("Resuming process...\n");
+    #endif
     continue_real_process(proc, sim_time);
 }
 
 void terminate_real_process(Process* proc, unsigned long sim_time) {
+    #ifdef PMDEBUG
+    printf("Terminating process...\n");
+    #endif
     int mngr_read = proc->mngr_read;
     int mngr_write = proc->mngr_write;
    
-    char sha[MAX_INFO_LEN];
+    char sha[SHA_LEN];
     send_32bit_sim_time(sim_time, mngr_write);
     //printf("\\%02x\\%02x\\%02x\\%02x\n", bytes[0], bytes[1], bytes[2], bytes[3]);
 
     kill(proc->pid, SIGTERM);
     int wstatus;
-    while (!WIFEXITED(wstatus)) {
-        if (waitpid(proc->pid, &wstatus, WUNTRACED) != -1) {
-            if (WIFEXITED(wstatus)) {
-                //printf("WTERMSIG = %d\n", WTERMSIG(wstatus));
-                read(mngr_read, sha, 64);
-                sha[64] = '\0';
-                strcpy(proc->sha, sha);
-            }
-            else {
-                //printf("WEXITSTATUS = %d\n", WEXITSTATUS(wstatus));
-            }
-        }
-        else {
-            printf("waitpid error\n");
+    pid_t w;
+    do {
+        w = waitpid(proc->pid, &wstatus, WUNTRACED);
+        if (w == -1) {
+            perror("waitpid error\n");
             exit(EXIT_FAILURE);
         }
-    }
-    
+
+        if (WIFEXITED(wstatus)) {
+            //printf("WTERMSIG = %d\n", WTERMSIG(wstatus));
+            read(mngr_read, sha, 64);
+            sha[64] = '\0';
+            //printf("sha at process termination = %s\n", sha);
+            strcpy(proc->sha, sha);
+        }
+    } while (!WIFEXITED(wstatus)); 
 }
 
 void send_32bit_sim_time(unsigned long sim_time, int mngr_write) {
+    //#ifdef PMDEBUG
+    //printf("Sim time = %lu\n", sim_time);
+    //#endif
     u_int8_t bytes[4];
     *(u_int32_t *) bytes = sim_time;
-    big_endian_reorder(bytes);
+    //printf("Untouched Hexadecimal Sim Time = \\%02x\\%02x\\%02x\\%02x\n", bytes[0], bytes[1], bytes[2], bytes[3]);
+
+    convert_big_endian(sim_time, bytes);
+    
+    //printf("Big Endian Sim Time = \\%02x\\%02x\\%02x\\%02x\n", bytes[0], bytes[1], bytes[2], bytes[3]);
     write(mngr_write, bytes, sizeof(bytes));
 }
 
 void verify_byte(unsigned long sim_time, int mngr_read) {
     u_int8_t bytes[4];
-    *(u_int32_t *) bytes = sim_time;
-    big_endian_reorder(bytes);
+
+    convert_big_endian(sim_time, bytes);
+
     char buf[4];
     read(mngr_read, buf, 1);
     //printf("\\%02x\n", *(u_int8_t *) buf);
@@ -692,18 +723,22 @@ void verify_byte(unsigned long sim_time, int mngr_read) {
     } 
 }
 
-void big_endian_reorder(u_int8_t* bytes) {
+void convert_big_endian(unsigned long sim_time, u_int8_t bytes[4]) {
 
-    u_int8_t tmp;
-    // reorder into Big Endian Byte Ordering
-    tmp = bytes[0];
-    bytes[0] = bytes[3];
-    bytes[3] = tmp;
-    tmp = bytes[1];
-    bytes[1] = bytes[2];
-    bytes[2] = tmp;
-
+    unsigned int big_end_sim_time = htonl(sim_time);
+    memcpy(bytes, &big_end_sim_time, 4);
 }
 
+// void big_endian_reorder(u_int8_t bytes[4]) {
+
+//     u_int8_t tmp;
+//     // reorder into Big Endian Byte Ordering
+//     tmp = bytes[0];
+//     bytes[0] = bytes[3];
+//     bytes[3] = tmp;
+//     tmp = bytes[1];
+//     bytes[1] = bytes[2];
+//     bytes[2] = tmp;
+// }
 
 #endif
