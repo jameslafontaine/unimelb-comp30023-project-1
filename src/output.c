@@ -7,7 +7,9 @@
 
 
 /* Adds an event to the event queue */
-void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time, State state, char proc_name[MAX_NAME_LEN], char* info) {
+void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time, 
+    State state, char proc_name[MAX_NAME_LEN], char* info) {
+
     Event* new_event = malloc(sizeof(Event));
     if (new_event == NULL) {
         fprintf(stderr, "Malloc error\n");
@@ -33,16 +35,20 @@ void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
         while (*event_q_len_ptr > 0) {
             next_event = *((Event *)(*event_q_head_ptr)->element);
             if (next_event.state == READY) {
-                printf("%lu,READY,process_name=%s,assigned_at=%s\n", next_event.sim_time, next_event.proc_name, next_event.info);
+                printf("%lu,READY,process_name=%s,assigned_at=%s\n", next_event.sim_time, 
+                        next_event.proc_name, next_event.info);
             }
             else if (next_event.state == RUNNING) {
-                printf("%lu,RUNNING,process_name=%s,remaining_time=%s\n", next_event.sim_time, next_event.proc_name, next_event.info);
+                printf("%lu,RUNNING,process_name=%s,remaining_time=%s\n", next_event.sim_time,
+                        next_event.proc_name, next_event.info);
             }
             else if (next_event.state == FINISHED) {
-                printf("%lu,FINISHED,process_name=%s,proc_remaining=%s\n", next_event.sim_time, next_event.proc_name, next_event.info);
+                printf("%lu,FINISHED,process_name=%s,proc_remaining=%s\n", next_event.sim_time,
+                        next_event.proc_name, next_event.info);
             }
             else if (next_event.state == FINISHED_PROCESS) {
-                printf("%lu,FINISHED-PROCESS,process_name=%s,sha=%s\n", next_event.sim_time, next_event.proc_name, next_event.info);
+                printf("%lu,FINISHED-PROCESS,process_name=%s,sha=%s\n", next_event.sim_time, 
+                        next_event.proc_name, next_event.info);
             }
             *event_q_head_ptr = dequeue(*event_q_head_ptr);
             *event_q_len_ptr -= 1;
@@ -52,6 +58,7 @@ void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
 
 /* Calculates and prints average turnaround time, max and average time overhead, and makespan */
 void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned long sim_time) {
+
     unsigned long total_turnaround = 0;
     unsigned long current_turnaround = 0;
     double total_overhead = 0;
@@ -72,7 +79,9 @@ void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned
         }
         current = current->next;
     }
-    printf("Turnaround time %lu\nTime overhead %.2lf %.2lf\nMakespan %lu\n", (unsigned long) ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
+    printf("Turnaround time %lu\nTime overhead %.2lf %.2lf\nMakespan %lu\n", 
+            (unsigned long) ceil((double)total_turnaround / fnsh_q_len), max_overhead,
+            total_overhead / fnsh_q_len, sim_time);
 }
 
 /* Compares two events according to execution transcript ordering */

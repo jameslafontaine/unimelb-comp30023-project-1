@@ -113,7 +113,8 @@ void terminate_real_process(Process* proc, unsigned long sim_time) {
     } while (!WIFEXITED(wstatus)); 
 }
 
-/* Sends the 32 bit simulation time in Big Endian Byte Ordering to the provided file descriptor */
+/* Sends the 32 bit simulation time in Big Endian Byte Ordering to the provided file 
+   descriptor */
 void send_32bit_sim_time(unsigned long sim_time, int mngr_write) {
 
     u_int8_t bytes[4];
@@ -124,7 +125,8 @@ void send_32bit_sim_time(unsigned long sim_time, int mngr_write) {
     write(mngr_write, bytes, sizeof(bytes));
 }
 
-/* Verifies that the first byte provided in the file descriptor matches the least significant byte of simulation time*/
+/* Verifies that the first byte provided in the file descriptor matches the least 
+   significant byte of simulation time*/
 void verify_byte(unsigned long sim_time, int mngr_read) {
     u_int8_t bytes[4];
 

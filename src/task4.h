@@ -1,5 +1,4 @@
-#define _POSIX_C_SOURCE 1
-
+#include <string.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,10 +25,12 @@ void resume_real_process(Process* proc, unsigned long sim_time);
 /* Terminates a real process by sending a terminate signal */
 void terminate_real_process(Process* proc, unsigned long sim_time);
 
-/* Sends the 32 bit simulation time in Big Endian Byte Ordering to the provided file descriptor */
+/* Sends the 32 bit simulation time in Big Endian Byte Ordering to the provided file 
+   descriptor */
 void send_32bit_sim_time(unsigned long sim_time, int mngr_write);
 
-/* Verifies that the first byte provided in the file descriptor matches the least significant byte of simulation time*/
+/* Verifies that the first byte provided in the file descriptor matches the least significant 
+   byte of simulation time*/
 void verify_byte(unsigned long sim_time, int mngr_read);
 
 /* Converts a 32 bit unsigned long to a byte array with Big Endian Ordering */

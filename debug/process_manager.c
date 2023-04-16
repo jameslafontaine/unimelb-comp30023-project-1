@@ -11,6 +11,7 @@
 #endif
 
 // #define PMDEBUG
+#define MEMDEBUG
 
 void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_list) {
     unsigned long simulation_time = 0;
@@ -301,7 +302,7 @@ int best_fit_alloc(Process* process, ListNode** mem_list) {
         else if (process->memory_req == best_fit_size) {
             best_fit_block->type = PROCESS;
         }
-        #ifdef PMDEBUG
+        #ifdef MEMDEBUG
         print_list(*mem_list);
         ListNode* current = *mem_list;
         while (current) {
@@ -392,7 +393,7 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
                 }
                 free_node(&next_node);
             }
-            #ifdef PMDEBUG
+            #ifdef MEMDEBUG
             print_list(*mem_list);
             ListNode* current = *mem_list;
             while (current) {
