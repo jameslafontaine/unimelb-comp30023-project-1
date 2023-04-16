@@ -21,7 +21,7 @@ $(EXE_DEBUG): debug/main.c debug/$(PROC_MAN_O) debug/$(T4_O) debug/$(INPUT_O) de
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	rm -f *.o src/*.o debug/*.o $(EXE)
+	rm -f *.o src/*.o debug/*.o $(EXE) $(EXE_DEBUG)
 
 format:
 	clang-format -i *.c *.h
