@@ -3,14 +3,13 @@
 #include <string.h>
 #include "process_utils.h"
 
-/* Retrieves the next process in the file list and shifts everything else up the list */
 Process next_process(ProcessList** process_list_ptr) {
     ProcessList* process_list = *process_list_ptr;
     int num_processes = process_list->num_processes;
 
     Process next_process = (process_list->processes)[0];
 
-    // Left shift all processes in the processes list by 1 position
+    // left shift all processes in the processes list by 1 position
     for (int i=1; i < num_processes; i++) {
         (process_list->processes)[i-1] = (process_list->processes)[i];
     }        
@@ -25,7 +24,7 @@ Process next_process(ProcessList** process_list_ptr) {
 }
 
 
-/* Translates a process state from int to string */
+// translates a process state from int to string
 const char* translate_state(State state) {
     if (state == READY) {
         return "READY";

@@ -10,7 +10,8 @@
 #include "task4.h"
 #endif
 
-/* Runs the simulation of the process manager */
+// #define PMDEBUG
+
 void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_list) {
     unsigned long simulation_time = 0;
 
@@ -34,9 +35,12 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
 
     memory_list_head = initialise_memory(memory_list_head);
 
-    // Complete cycles while there are still processes that haven't finished execution
+    // complete cycles while there are still processes that haven't finished execution
     while (process_list->num_processes > 0 || in_queue_len > 0 || rdy_queue_len > 0 || running_head != NULL) {
         
+        #ifdef PMDEBUG
+        printf("Simulation time = %lu\n", simulation_time);
+        #endif
         check_running_process(&running_head, &in_queue_len, &rdy_queue_head, &rdy_queue_len, &fnsh_queue_head, &fnsh_queue_len, simulation_time, quantum, sched, &memory_list_head, mem_mng, &event_queue_head, &event_queue_len);
         add_submitted_processes(&in_queue_head, &in_queue_len, &process_list, simulation_time, &event_queue_head, &event_queue_len);
         allocate_memory(&in_queue_head, &in_queue_len, &rdy_queue_head, &rdy_queue_len, &memory_list_head, mem_mng, simulation_time, &event_queue_head, &event_queue_len);
@@ -44,14 +48,29 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
         print_events(&event_queue_head, &event_queue_len);
         // Process manager sleeps for quantum seconds, after which a new cycle begins
         simulation_time += quantum;
+        #ifdef PMDEBUG
+        if (simulation_time > 400) {
+            exit(EXIT_SUCCESS);
+        }
+        #endif
     }
-    // Subtract last quantum added as this cycle doesn't actually occur
+    // subtract last quantum added as this cycle doesn't actually occur
     simulation_time -= quantum;
     calculate_performance_stats(fnsh_queue_head, fnsh_queue_len, simulation_time);
     free_list(&in_queue_head);
     free_list(&rdy_queue_head);
     free_list(&running_head); 
     free_list(&fnsh_queue_head);
+
+    #ifdef PMDEBUG
+    print_list(memory_list_head);
+    ListNode* current = memory_list_head;
+    while (current) {
+        print_memory_block((MemoryBlock *) current->element);
+        current = current->next;
+    }
+    #endif
+
     free_list(&memory_list_head);
     free_list(&event_queue_head);
     in_queue_head = NULL;
@@ -62,19 +81,24 @@ void run_simulation(char* sched, char* mem_mng, char* Q, ProcessList* process_li
     event_queue_head = NULL;
 }
 
-/* Determines whether the currently running process (if any) has completed.
-    If so it should be terminated and its memory deallocated before
-    subsequent scheduling tasks are performed. */
+
+// Determine whether the currently running process (if any) has completed.
+// If so it should be terminated and its memory deallocated before
+// subsequent scheduling tasks are performed.
 void check_running_process(ListNode** running_head_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, ListNode** fnsh_q_head_ptr, int* fnsh_q_len_ptr, unsigned long sim_time, 
 short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     
-    // Do nothing if there is no currently running process
+    #ifdef PMDEBUG
+    printf("Checking running processes...\n");
+    #endif
+    
+    // do nothing if there is no currently running process
     if (*running_head_ptr == NULL) {
         return;
     } 
     else {
         Process* running_proc = (Process *)(*running_head_ptr)->element;
-        // Subtract quantum from the service time of the currently running process, or set
+        // subtract quantum from the service time of the currently running process, or set
         // the service time to 0 it is less than the quantum to prevent integer overflow
         if (running_proc->rem_service_time < quantum) {
             running_proc->rem_service_time = 0;
@@ -87,34 +111,47 @@ short quantum, char* sched, ListNode** mem_list_ptr, char* mem_mng, ListNode** e
         running_proc->run_1_quantum = true;
         #endif
 
-        // Check if running process' service time has elapsed and is therefore finished
+        #ifdef PMDEBUG
+        printf("Remaining service time for current process - %lu\n", running_proc->rem_service_time);
+        #endif
+
+        // check if running process' service time has elapsed and is therefore finished
         if (running_proc->rem_service_time == 0) {
             deallocate_memory(running_head_ptr, mem_list_ptr, mem_mng);
             int dummy_len = 0;
             running_proc = transition_process(running_head_ptr, &dummy_len, fnsh_q_head_ptr, fnsh_q_len_ptr, FINISHED);
             running_proc->finish_time = sim_time;
-            // Convert remaining processes to string for event printing
+            //print_process(*running_proc_ptr);
+            // convert remaining time to string for event printing
             char remaining_procs[MAX_INFO_LEN];
             sprintf(remaining_procs, "%d", *rdy_q_len_ptr + *in_q_len_ptr);
             add_event(event_q_head_ptr, event_q_len_ptr, sim_time, running_proc->state, running_proc->name, remaining_procs);
 
             #ifdef IMPLEMENTS_REAL_PROCESS
-            // Terminate process and retrieve the sha value
+            // terminate process and retrieve the sha value
             terminate_real_process(running_proc, sim_time);
             add_event(event_q_head_ptr, event_q_len_ptr, sim_time, FINISHED_PROCESS, running_proc->name, running_proc->sha);
             #endif
+
+            //free(*running_proc_ptr);
+            //print_process((retrieve_tail(*fnsh_q_head_ptr))->element);
         } 
         return;
     }
 }
 
-
-/* Identifies all processes that have been submitted to the system since
-    the last cycle occurred and adds them to the input queue in the order 
-    they appear in the process file. (Arrival time <= simulation time) */
+// Identify all processes that have been submitted to the system since
+// the last cycle occurred and add them to the input queue in the order 
+// they appear in the process file. (Arrival time <= simulation time)
 void add_submitted_processes(ListNode** in_q_head_ptr, int* in_q_len_ptr, ProcessList** process_list_ptr, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     
+    #ifdef PMDEBUG
+    printf("Adding submitted processes...\n");
+    #endif
     while ((*process_list_ptr)->num_processes > 0 && ((*process_list_ptr)->processes)[0].arrival_time <= sim_time) {
+        //printf("Num processes = %d\n", (*process_list_ptr)->num_processes);
+        //printf("Next process arrival time = %lu\n", ((*process_list_ptr)->processes)[0].arrival_time);
+        //print_list(*in_q_head_ptr);
         Process* next_proc = malloc(sizeof(Process));
         if (next_proc == NULL) {
             fprintf(stderr, "Malloc failure\n");
@@ -122,14 +159,64 @@ void add_submitted_processes(ListNode** in_q_head_ptr, int* in_q_len_ptr, Proces
         }
         *next_proc = next_process(process_list_ptr);
         *in_q_head_ptr = enqueue(*in_q_head_ptr , next_proc);
+        //print_list(*in_q_head_ptr);
         *in_q_len_ptr += 1;
     }
     return;
 
 }
 
+// The process manager will use ONE of the following methods to allocate memory to processes:
+// -- Assume memory requirements are always immediately satisfied (e.g. there is an
+//    infinite amount of memory). All the arrived processes will automatically enter a 
+//    READY state, and be placed at the end of the ready queue in the same order as they appear in
+//    the input queue OR
+//
+// -- Allocate memory to processes in the input queue according to a memory allocation algorithm.
+//    Processes for which memory allocation is successful enter a READY state, and are placed at the end of
+//    the ready queue in order of memory allocation to await CPU time.
+void allocate_memory(ListNode** in_q_head_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, 
+                     ListNode** mem_list, char* mem_mng, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
+    
+    #ifdef PMDEBUG
+    printf("Attempting to allocate memory...\n");
+    #endif
+    // if the memory allocation method is infinite then all processes in the input queue will automatically enter
+    // the ready queue in the same order as they appear in the input queue
+    if (strcmp(mem_mng, "infinite") == EQUAL) {
+        
+        while (*in_q_len_ptr > 0) {
+            transition_process(in_q_head_ptr, in_q_len_ptr, rdy_q_head_ptr, rdy_q_len_ptr, READY);
+        }
+        
+    }
+    // if the memory allocation method is best-fit then processes in the input queue will enter
+    // the ready queue if memory is successfully allocated to them via best fit
+    else if (strcmp(mem_mng, "best-fit") == EQUAL) {
+        int num_processes_checked = 0;
+        int initial_length = *in_q_len_ptr;
+        while (num_processes_checked < initial_length) {
+            // see if we can allocate memory to this process using best fit
+            if (best_fit_alloc((Process *)((*in_q_head_ptr)->element), mem_list)) {
+                Process* next_proc = transition_process(in_q_head_ptr, in_q_len_ptr, rdy_q_head_ptr, rdy_q_len_ptr, READY);
+                // convert memory address to string for event printing
+                char mem_address[MAX_INFO_LEN];
+                sprintf(mem_address, "%hu", next_proc->mem_address);
+                add_event(event_q_head_ptr, event_q_len_ptr, sim_time, next_proc->state, next_proc->name, mem_address);      
+            }
+            // otherwise move this process to the end of the input queue
+            else {
+                transition_process(in_q_head_ptr, in_q_len_ptr, in_q_head_ptr, in_q_len_ptr, WAITING);
+            }
+            num_processes_checked += 1;
+        }
+    }
+    else {
+        fprintf(stderr, "Invalid memory allocation method\n");
+		exit(EXIT_FAILURE);
+    }
+}
 
-/* Initialises the memory linked list to have a 2048MB hole */
 ListNode* initialise_memory(ListNode* mem_list_head) {
     MemoryBlock* new_block = (MemoryBlock *) malloc(sizeof(MemoryBlock));
     if (new_block == NULL) {
@@ -145,47 +232,6 @@ ListNode* initialise_memory(ListNode* mem_list_head) {
 }
 
 
-/* Moves processes from the input queue to the ready queue upon successful memory allocation */
-void allocate_memory(ListNode** in_q_head_ptr, int* in_q_len_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, 
-ListNode** mem_list, char* mem_mng, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
-
-    // If the memory allocation method is infinite then all processes in the input queue will automatically enter
-    // the ready queue in the same order as they appear in the input queue
-    if (strcmp(mem_mng, "infinite") == EQUAL) {
-        
-        while (*in_q_len_ptr > 0) {
-            transition_process(in_q_head_ptr, in_q_len_ptr, rdy_q_head_ptr, rdy_q_len_ptr, READY);
-        }
-        
-    }
-    // If the memory allocation method is best-fit then processes in the input queue will enter
-    // the ready queue if memory is successfully allocated to them via best fit
-    else if (strcmp(mem_mng, "best-fit") == EQUAL) {
-        int num_processes_checked = 0;
-        int initial_length = *in_q_len_ptr;
-        while (num_processes_checked < initial_length) {
-            // See if we can allocate memory to this process using best fit
-            if (best_fit_alloc((Process *)((*in_q_head_ptr)->element), mem_list)) {
-                Process* next_proc = transition_process(in_q_head_ptr, in_q_len_ptr, rdy_q_head_ptr, rdy_q_len_ptr, READY);
-                // Convert memory address to string for event printing
-                char mem_address[MAX_INFO_LEN];
-                sprintf(mem_address, "%hu", next_proc->mem_address);
-                add_event(event_q_head_ptr, event_q_len_ptr, sim_time, next_proc->state, next_proc->name, mem_address);      
-            }
-            // Otherwise move this process to the end of the input queue
-            else {
-                transition_process(in_q_head_ptr, in_q_len_ptr, in_q_head_ptr, in_q_len_ptr, WAITING);
-            }
-            num_processes_checked += 1;
-        }
-    }
-    else {
-        fprintf(stderr, "Invalid memory allocation method\n");
-		exit(EXIT_FAILURE);
-    }
-}
-
-/* Tries to allocate memory for the given process using best fit, returns success or failure int */
 int best_fit_alloc(Process* process, ListNode** mem_list) {
     unsigned short best_fit_size = MAX_MEM + 1;
     ListNode* best_fit_node = NULL;
@@ -195,17 +241,26 @@ int best_fit_alloc(Process* process, ListNode** mem_list) {
 
     process->has_mem_alloc = false;
 
+    #ifdef PMDEBUG
+    printf("Attempting to find best fit...\n");
+    #endif
+
     // iterate through memory list until reach end and track smallest hole that is greater
     // than or equal to memory requirement of process
     while (current) {
         current_block = (MemoryBlock *) (current->element);
+        #ifdef PMDEBUG
+        print_memory_block(current_block);
+        printf("process->memory_req = %hu\n", process->memory_req);
+        printf("best_fit_size = %hu\n", best_fit_size);
+        #endif
         if (current_block->type == HOLE && current_block->length >= process->memory_req && current_block->length < best_fit_size) {
             best_fit_size = current_block->length;
             best_fit_node = current;
             best_fit_block = (MemoryBlock *) (best_fit_node->element); 
             process->mem_address = current_block->start_address;
             process->has_mem_alloc = true;
-            // Can stop if we find an exact fit as this won't be beaten by other blocks
+            // can stop if we find an exact fit as this won't be beaten by other blocks
             if (current_block->length == process->memory_req) {
                 break;
             }
@@ -213,9 +268,12 @@ int best_fit_alloc(Process* process, ListNode** mem_list) {
         current = current->next;
     }
 
+    #ifdef PMDEBUG
+    printf("MODIFYING MEMORY LIST TO REPRESENT ALLOCATION\n");
+    #endif
     if (process->has_mem_alloc == true) {
-        // Modify memory list to represent the allocation 
-        // If the memory requirement is smaller than the size of the hole then we must reserve the required
+        // modify memory list to represent the allocation 
+        // if the memory requirement is smaller than the size of the hole then we must reserve the required
         // amount of memory and leave the rest as a hole
         if (process->memory_req < best_fit_size) {
             MemoryBlock* new_hole = (MemoryBlock *) malloc(sizeof(MemoryBlock));
@@ -229,11 +287,28 @@ int best_fit_alloc(Process* process, ListNode** mem_list) {
             best_fit_block->type = PROCESS;
             best_fit_block->length = process->memory_req;
             best_fit_node = insert_after_node(best_fit_node, new_hole);
+            //best_fit_node = insert_at_tail(best_fit_node, new_hole);
+            //if (best_fit_node->prev != NULL) {
+            //    (best_fit_node->prev)->next = best_fit_node;
+            //}
+            //#ifdef PMDEBUG
+            //print_memory_block(best_fit_block);
+            //print_memory_block(new_hole);
+            //print_list(*mem_list);
+            //#endif
         }
-        // If the fit is exact then we simply change the block type from hole to process
+        // if the fit is exact then we simply change the block type from hole to process
         else if (process->memory_req == best_fit_size) {
             best_fit_block->type = PROCESS;
         }
+        #ifdef PMDEBUG
+        print_list(*mem_list);
+        ListNode* current = *mem_list;
+        while (current) {
+            print_memory_block((MemoryBlock *) current->element);
+            current = current->next;
+        }
+        #endif 
         return SUCCESS;
     }
     else {
@@ -241,15 +316,19 @@ int best_fit_alloc(Process* process, ListNode** mem_list) {
     }
 }
 
-/* Deallocates memory for a finished process */ 
+// Deallocate memory for a finished process
 void deallocate_memory(ListNode** running_head_ptr, ListNode** mem_list, char* mem_mng) {
 
-    // If the memory allocation method is infinite then no memory needs to be deallocated
+    #ifdef PMDEBUG
+    printf("Deallocating memory...\n");
+    #endif
+
+    // if the memory allocation method is infinite then no memory needs to be deallocated
     if (strcmp(mem_mng, "infinite") == EQUAL) {
         return;
     }
-    // If the memory allocation method is best-fit then deallocate memory by checking 
-    // if holes need to be joined and updating the memory linked list
+    // if the memory allocation method is best-fit then move the finished process to the finished queue 
+    // and deallocate memory by checking if holes need to be joined and updating the memory linked list
     else if (strcmp(mem_mng, "best-fit") == EQUAL) {
         best_fit_dealloc((Process *)(*running_head_ptr)->element, mem_list);
     }
@@ -259,7 +338,7 @@ void deallocate_memory(ListNode** running_head_ptr, ListNode** mem_list, char* m
     }
 }
 
-/* Removes a process from the memory list and joins holes as needed */
+// remove process from memory list and join holes as needed
 void best_fit_dealloc(Process* process, ListNode** mem_list) {
     
     ListNode* allocated_node = NULL;
@@ -273,7 +352,7 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
 
     process->has_mem_alloc = false;
 
-    // Iterate through memory list until reach allocated block for this process and remove it
+    // iterate through memory list until reach allocated block for this process and remove it
     // while filling in holes
     while (current) {
         current_block = (MemoryBlock *) (current->element);
@@ -289,7 +368,7 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
                 next_block = (MemoryBlock *) next_node->element;
             }
             
-            // If blocks to left and right are processes then we simply change the type of this block
+            // if blocks to left and right are processes then we simply change the type of this block
             // to a hole, otherwise we must also join holes
             allocated_block->type = HOLE;
             if (prev_node != NULL && prev_block->type == HOLE) {
@@ -299,9 +378,9 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
                 if (allocated_node->prev != NULL) {
                     (prev_node->prev)->next = allocated_node;
                 }
-                // Set memory list head to allocated node if it has become the new head
+                // set memory list head to allocated node if it is the new head
                 else { 
-                    (*mem_list = allocated_node);
+                (*mem_list = allocated_node);
                 }
                 free_node(&prev_node);
             }
@@ -313,6 +392,14 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
                 }
                 free_node(&next_node);
             }
+            #ifdef PMDEBUG
+            print_list(*mem_list);
+            ListNode* current = *mem_list;
+            while (current) {
+                print_memory_block((MemoryBlock *) current->element);
+                current = current->next;
+            }
+            #endif
             break;
         }
         current = current->next;    
@@ -321,32 +408,41 @@ void best_fit_dealloc(Process* process, ListNode** mem_list) {
 
 
 
-/* Determines the process (if any) which runs in this cycle */
+// Determine the process (if any) which runs in this cycle. Depending on the 
+// scheduling algorithm, this could be the process that was previously running,
+// a resumed process that was previously placed back into the ready queue,
+// or a READY process which has not previously executed
 void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, char* sched, unsigned long sim_time, ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     
-    // If the scheduling method is shortest job first then the process with the smallest service time gets
+    #ifdef PMDEBUG
+    printf("Scheduling process...\n");
+    #endif
+
+    // if the scheduling method is shortest job first then the process with the smallest service time gets
     // to run until completion, so we only need to let a new process run when there isn't a current running process
     if (strcmp(sched, "SJF") == EQUAL && *running_head_ptr == NULL && *rdy_q_len_ptr > 0) {
         
-        // Find the process in the ready queue with the smallest service time, choose earliest arrival time then
+        // find the process in the ready queue with the smallest service time, choose earliest arrival time then
         // the process that comes first lexicographically in the case of ties
         static int (*cmp_func)(ListNode*, ListNode*);
         cmp_func = sjf_cmp;
+        //print_list(*rdy_q_head_ptr);
         *rdy_q_head_ptr = ins_sort_list(*rdy_q_head_ptr, cmp_func);
+        //print_list(*rdy_q_head_ptr);
         run_process(running_head_ptr, rdy_q_head_ptr, rdy_q_len_ptr, event_q_head_ptr, event_q_len_ptr, sim_time);
 
         #ifdef IMPLEMENTS_REAL_PROCESS
-        // Create a real process as this must be the process' first time running
+        // create a real process using process.c as this must be the process' first time running
         create_real_process((Process *) (*running_head_ptr)->element, sim_time);
         #endif
     }
-    // If the scheduling method is round robin then simply let the next process in the ready queue run if
+    // if the scheduling method is round robin then simply let the next process in the ready queue run if
     // there is one by preempting the currently running process, otherwise give more CPU time to the currently running process
     else if (strcmp(sched, "RR") == EQUAL && *rdy_q_len_ptr > 0 ) {
         if (*running_head_ptr != NULL) {
             
             #ifdef IMPLEMENTS_REAL_PROCESS
-            // Suspend the currently running process
+            // suspend the currently running process
             suspend_real_process((Process *) (*running_head_ptr)->element, sim_time);
             #endif
 
@@ -356,12 +452,12 @@ void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, in
         run_process(running_head_ptr, rdy_q_head_ptr, rdy_q_len_ptr, event_q_head_ptr, event_q_len_ptr, sim_time);
 
         #ifdef IMPLEMENTS_REAL_PROCESS
-        // Create a real process if this is the process' first time running
+        // create a real process if this is the process' first time running
         Process* running_proc = (Process *) (*running_head_ptr)->element;
         if (running_proc->service_time == running_proc->rem_service_time) {
             create_real_process(running_proc, sim_time);
         }
-        // Otherwise the process is being resumed
+        // otherwise the process is being resumed
         else {
             resume_real_process(running_proc, sim_time);
         }
@@ -374,7 +470,7 @@ void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, in
     }
 
     #ifdef IMPLEMENTS_REAL_PROCESS
-    // If we are letting the currently running process have more CPU time then it is being continued, (except
+    // if we are letting the currently running process have more CPU time then it is being continued, (except
     // for the cycle on which it was created or resumed running)
     else if (*running_head_ptr != NULL) {
         Process* running_proc = (Process *) ((*running_head_ptr)->element);
@@ -389,18 +485,17 @@ void schedule_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, in
 
 }
 
-/* Performs the necessary steps to begin running the next process in the ready queue */
+
 void run_process(ListNode** running_head_ptr, ListNode** rdy_q_head_ptr, int* rdy_q_len_ptr, ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time) {
 
     int dummy_len = 0;
     Process* running_proc = transition_process(rdy_q_head_ptr, rdy_q_len_ptr, running_head_ptr, &dummy_len, RUNNING);
-    // Convert remaining time to string for event printing
+    // convert remaining time to string for event printing
     char remaining_time[MAX_INFO_LEN];
     sprintf(remaining_time, "%lu", running_proc->rem_service_time);
     add_event(event_q_head_ptr, event_q_len_ptr, sim_time, running_proc->state, running_proc->name, remaining_time);
 }
 
-/* Moves a process from one queue/state to another */
 Process* transition_process(ListNode** source_head_ptr, int* source_len_ptr, ListNode** dest_head_ptr, int* dest_len_ptr, State state) {
     Process* next_proc =  malloc(sizeof(Process));
     if (next_proc == NULL) {
@@ -411,16 +506,27 @@ Process* transition_process(ListNode** source_head_ptr, int* source_len_ptr, Lis
     next_proc->state = state;
     *source_head_ptr = dequeue(*source_head_ptr);
     *source_len_ptr -= 1;
-    *dest_head_ptr = enqueue(*dest_head_ptr, next_proc);
-    *dest_len_ptr += 1;                                  
+    *dest_head_ptr = enqueue(*dest_head_ptr, next_proc); // could pass pointer into function from source queue rather than malloc a new process pointer,
+    *dest_len_ptr += 1;                                  // but would have to remove free(node->element in d_linked_list.c)
     return next_proc;
 }
 
-/* Compares two processes according to SJF specifications */
+
+
+// Compares two processes according to SJF specifications
 int sjf_cmp(ListNode* node1, ListNode* node2) {
 
     Process process1 = *((Process*)(node1->element));
     Process process2 = *((Process*)(node2->element));
+
+    #ifdef PMDEBUG
+    printf("Process 1 service = %lu\n", process1.service_time);
+    printf("Process 2 service = %lu\n", process2.service_time);
+    printf("Process 1 arrival = %lu\n", process1.arrival_time);
+    printf("Process 2 arrival = %lu\n", process2.arrival_time);
+    printf("Process 1 name = %s\n", process1.name);
+    printf("Process 2 name = %s\n", process2.name);
+    #endif
 
     if (process1.service_time < process2.service_time) {
         return LESS_THAN;
@@ -446,8 +552,6 @@ int sjf_cmp(ListNode* node1, ListNode* node2) {
     }
 }
 
-/* Prints the contents of the supplied memory block from the linked list */
-/*
 void print_memory_block(MemoryBlock* mem_block) {
     printf("###################################\n");
     printf("mem_block->type = %d\n", mem_block->type);
@@ -455,5 +559,4 @@ void print_memory_block(MemoryBlock* mem_block) {
     printf("mem_block->length = %hu\n", mem_block->length);
     printf("###################################\n");
 }
-*/
 

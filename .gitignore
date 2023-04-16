@@ -8,3 +8,6 @@ process
 process.c
 process_test.c
 process_test
+emitted.c
+test.sh
+testval.sh

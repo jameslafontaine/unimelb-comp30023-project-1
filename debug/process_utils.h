@@ -13,6 +13,7 @@ typedef int boolean;
 #define true 1
 #define false 0 
 
+
 typedef struct process Process;
 typedef enum { READY = 2, RUNNING = 3, FINISHED = 0, FINISHED_PROCESS = 1, WAITING = -1} State;
 
@@ -41,17 +42,17 @@ struct process {
 
 typedef struct process_list ProcessList;
 
-/* contains the number of processes in processes alongside the array itself */
+// contains the number of processes in processes alongside the array itself
 struct process_list {
     Process* processes;
     int num_processes;
 };
 
-/* Retrieves the next process in the file list and shifts everything else up the list */
+// retrives the next process in the file list and shifts everything else up the list
 Process next_process(ProcessList** process_list_ptr);
 
 
-/* Translates a process state from int to string */
+// translates a process state from int to string
 const char* translate_state(State state);
 
 #endif

@@ -7,11 +7,12 @@ PUTILS_O=process_utils.o
 PROC_MAN_O=process_manager.o 
 INPUT_O=input_parser.o
 OUTPUT_O=output.o
+T4_O=task4.o
 
 all: $(EXE)
 
 
-$(EXE): src/main.c $(PROC_MAN_O) $(INPUT_O) $(OUTPUT_O) $(PUTILS_O) $(DLL_O)
+$(EXE): src/main.c $(PROC_MAN_O) $(T4_O) $(INPUT_O) $(OUTPUT_O) $(PUTILS_O) $(DLL_O) 
 	$(CC) $(CFLAGS) -o $(EXE) $^ -lm
 
 %.o: src/%.c src/%.h

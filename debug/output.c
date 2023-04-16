@@ -4,9 +4,37 @@
 #include <math.h>
 #include "output.h"
 
+//#define OUTDEBUG
 
 
-/* Adds an event to the event queue */
+
+
+void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned long sim_time) {
+    unsigned long total_turnaround = 0;
+    unsigned long current_turnaround = 0;
+    double total_overhead = 0;
+    double current_overhead;
+    double max_overhead = 0;
+    Process* current_process;
+
+    ListNode* current = fnsh_q_head;
+
+    while (current) {
+        current_process = (Process*)(current->element);
+        //print_process(current_process);
+        current_turnaround = current_process->finish_time - current_process->arrival_time;
+        //current_process->turnaround = current_turnaround;
+        total_turnaround += current_turnaround;
+        current_overhead = (double)current_turnaround / current_process->service_time;
+        total_overhead += current_overhead;
+        if (current_overhead > max_overhead) {
+            max_overhead = current_overhead;
+        }
+        current = current->next;
+    }
+    printf("Turnaround time %lu\nTime overhead %.2lf %.2lf\nMakespan %lu\n", (unsigned long) ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
+}
+
 void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long sim_time, State state, char proc_name[MAX_NAME_LEN], char* info) {
     Event* new_event = malloc(sizeof(Event));
     if (new_event == NULL) {
@@ -22,9 +50,11 @@ void add_event(ListNode** event_q_head_ptr, int* event_q_len_ptr, unsigned long 
     *event_q_len_ptr += 1;
 }
 
-/* Prints out events for the current cycle that are stored in the event queue */
 void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     
+    #ifdef OUTDEBUG
+    printf("Printing events...\n");
+    #endif
     if (*event_q_len_ptr > 0) {
         Event next_event;
         static int (*cmp_func)(ListNode*, ListNode*);
@@ -50,32 +80,16 @@ void print_events(ListNode** event_q_head_ptr, int* event_q_len_ptr) {
     }
 }
 
-/* Calculates and prints average turnaround time, max and average time overhead, and makespan */
-void calculate_performance_stats(ListNode* fnsh_q_head, int fnsh_q_len, unsigned long sim_time) {
-    unsigned long total_turnaround = 0;
-    unsigned long current_turnaround = 0;
-    double total_overhead = 0;
-    double current_overhead;
-    double max_overhead = 0;
-    Process* current_process;
-
-    ListNode* current = fnsh_q_head;
-
-    while (current) {
-        current_process = (Process*)(current->element);
-        current_turnaround = current_process->finish_time - current_process->arrival_time;
-        total_turnaround += current_turnaround;
-        current_overhead = (double)current_turnaround / current_process->service_time;
-        total_overhead += current_overhead;
-        if (current_overhead > max_overhead) {
-            max_overhead = current_overhead;
-        }
-        current = current->next;
-    }
-    printf("Turnaround time %lu\nTime overhead %.2lf %.2lf\nMakespan %lu\n", (unsigned long) ceil((double)total_turnaround / fnsh_q_len), max_overhead, total_overhead / fnsh_q_len, sim_time);
+void print_process(Process* process) {
+    printf("################################\n");
+    printf("Process Name = %s\n", process->name);
+    printf("Arrival time = %lu\n", process->arrival_time);
+    printf("Finish time = %lu\n", process->finish_time);
+    printf("Service time = %lu\n", process->service_time);
+    printf("State = %d\n", process->state);
+    printf("################################\n");
 }
 
-/* Compares two events according to execution transcript ordering */
 int event_cmp(ListNode* node1, ListNode* node2) {
 
     Event event1 = *((Event*)(node1->element));
@@ -91,15 +105,3 @@ int event_cmp(ListNode* node1, ListNode* node2) {
         return EQUAL;
     }
 }
-
-/*
-void print_process(Process* process) {
-    printf("################################\n");
-    printf("Process Name = %s\n", process->name);
-    printf("Arrival time = %lu\n", process->arrival_time);
-    printf("Finish time = %lu\n", process->finish_time);
-    printf("Service time = %lu\n", process->service_time);
-    printf("State = %d\n", process->state);
-    printf("################################\n");
-}
-*/
