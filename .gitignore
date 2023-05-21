@@ -11,3 +11,4 @@ process_test
 emitted.c
 test.sh
 testval.sh
+generated-tests/
