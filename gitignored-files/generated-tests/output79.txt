@@ -1,0 +1,19 @@
+0,READY,process_name=P0,assigned_at=0
+0,RUNNING,process_name=P0,remaining_time=500
+6,READY,process_name=P3,assigned_at=188
+10,READY,process_name=P1,assigned_at=1170
+30,READY,process_name=P2,assigned_at=1528
+500,FINISHED,process_name=P0,proc_remaining=3
+500,FINISHED-PROCESS,process_name=P0,sha=2ff3934b58f2fbd9870b891f2bbaba7368e6cbe754156696e3f2edcd53761450
+500,RUNNING,process_name=P1,remaining_time=343
+844,FINISHED,process_name=P1,proc_remaining=2
+844,FINISHED-PROCESS,process_name=P1,sha=a4f810ac29b3f110c4779aac4954f88d2846cb1d093be9e6e5a132f659ab61f5
+844,RUNNING,process_name=P3,remaining_time=922
+1766,FINISHED,process_name=P3,proc_remaining=1
+1766,FINISHED-PROCESS,process_name=P3,sha=1ec5423f74046c3766cdc8c9cb58925e6367f98ccc86caf3be96dde31f7ac695
+1766,RUNNING,process_name=P2,remaining_time=935
+2702,FINISHED,process_name=P2,proc_remaining=0
+2702,FINISHED-PROCESS,process_name=P2,sha=c13a3f59da35ef58660fd1b55f14b7cac99201880709b3ec3dab57a82d578183
+Turnaround time 1442
+Time overhead 2.86 2.05
+Makespan 2702

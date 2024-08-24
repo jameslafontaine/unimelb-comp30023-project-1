@@ -1,0 +1,7 @@
+0,READY,process_name=P0,assigned_at=0
+0,RUNNING,process_name=P0,remaining_time=603
+604,FINISHED,process_name=P0,proc_remaining=0
+604,FINISHED-PROCESS,process_name=P0,sha=747c6f8618b48580a4cbd554debcca48af66f3d945f0af35fd9663ff18bc537c
+Turnaround time 604
+Time overhead 1.00 1.00
+Makespan 604

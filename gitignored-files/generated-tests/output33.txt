@@ -1,0 +1,42 @@
+0,RUNNING,process_name=P0,remaining_time=896
+896,FINISHED,process_name=P0,proc_remaining=12
+896,FINISHED-PROCESS,process_name=P0,sha=a2d6d3bf4da53955c8369ace5a23db83ef9b94bbb2c7f639cbd66dbf49111b8f
+896,RUNNING,process_name=P7,remaining_time=21
+917,FINISHED,process_name=P7,proc_remaining=11
+917,FINISHED-PROCESS,process_name=P7,sha=18ed94394b9a2ad506c43a5d234a7d69c0a51b75f3d155f9873ca748107bb8e6
+917,RUNNING,process_name=P2,remaining_time=41
+958,FINISHED,process_name=P2,proc_remaining=10
+958,FINISHED-PROCESS,process_name=P2,sha=209263b1c434f8a315fa9a449855876dbd21b23b536fbfd940ddfdc15a8f3e1c
+958,RUNNING,process_name=P4,remaining_time=48
+1006,FINISHED,process_name=P4,proc_remaining=9
+1006,FINISHED-PROCESS,process_name=P4,sha=ed78cee0e2eb8b2fe06c9a4abb5312c57469fb28044b7660a6fc61d93b0bb268
+1006,RUNNING,process_name=P1,remaining_time=225
+1231,FINISHED,process_name=P1,proc_remaining=8
+1231,FINISHED-PROCESS,process_name=P1,sha=d73fa56e6e05c1f04fb809d72447404422eacf901576080134ddddf0a2685a03
+1231,RUNNING,process_name=P11,remaining_time=278
+1509,FINISHED,process_name=P11,proc_remaining=7
+1509,FINISHED-PROCESS,process_name=P11,sha=2a7de6569b808d9e24f4fba13273206b3e54875ac0686daaf1b3c02472e68d3b
+1509,RUNNING,process_name=P3,remaining_time=304
+1813,FINISHED,process_name=P3,proc_remaining=6
+1813,FINISHED-PROCESS,process_name=P3,sha=9602ea980c5c4b05818623e09fc598852e4fa3de6312a266c7059edfcbfe3553
+1813,RUNNING,process_name=P10,remaining_time=382
+2195,FINISHED,process_name=P10,proc_remaining=5
+2195,FINISHED-PROCESS,process_name=P10,sha=e923a7b2ed9020017fa7aa43002bf3ca7be78fe262e0c6ba91719a2f44904219
+2195,RUNNING,process_name=P12,remaining_time=461
+2656,FINISHED,process_name=P12,proc_remaining=4
+2656,FINISHED-PROCESS,process_name=P12,sha=464051ccf6d01659be83b9495f73afd6b27609d7332438e74a235031812304b6
+2656,RUNNING,process_name=P9,remaining_time=568
+3224,FINISHED,process_name=P9,proc_remaining=3
+3224,FINISHED-PROCESS,process_name=P9,sha=0a614c11f4619ca93545e820a47bb489857f3171b0b8da2e55759ba3834b9c3c
+3224,RUNNING,process_name=P5,remaining_time=574
+3798,FINISHED,process_name=P5,proc_remaining=2
+3798,FINISHED-PROCESS,process_name=P5,sha=628d1974c6be39b3c86d40cc5e7827e63c3be3840ffaf5b7fbb84361fc8f9776
+3798,RUNNING,process_name=P6,remaining_time=871
+4669,FINISHED,process_name=P6,proc_remaining=1
+4669,FINISHED-PROCESS,process_name=P6,sha=82a9716342503c1994129fd686493aa15bd4f2433bd00b0013f935b63009bf8e
+4669,RUNNING,process_name=P8,remaining_time=909
+5578,FINISHED,process_name=P8,proc_remaining=0
+5578,FINISHED-PROCESS,process_name=P8,sha=4d59cd363be62ce38081dec4c84fe11a5091f20fc9f9c5f837584f2664ba89c1
+Turnaround time 2275
+Time overhead 37.81 10.17
+Makespan 5578

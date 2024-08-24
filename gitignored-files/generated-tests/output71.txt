@@ -1,0 +1,24 @@
+0,RUNNING,process_name=P0,remaining_time=342
+342,FINISHED,process_name=P0,proc_remaining=6
+342,FINISHED-PROCESS,process_name=P0,sha=495c6af2c9ab26b742bf939423cd796ca46a350fc78f4baadee0d8241623eaf5
+342,RUNNING,process_name=P1,remaining_time=146
+489,FINISHED,process_name=P1,proc_remaining=5
+489,FINISHED-PROCESS,process_name=P1,sha=4d0b65da578501ac6e0377cffdb6d113683b0362faef8049851993ac2697f5a0
+489,RUNNING,process_name=P6,remaining_time=332
+822,FINISHED,process_name=P6,proc_remaining=4
+822,FINISHED-PROCESS,process_name=P6,sha=47d762bc7304d9d3147a59a8cbaab09ee1426d55ed94e983712478ece8826dbb
+822,RUNNING,process_name=P3,remaining_time=353
+1176,FINISHED,process_name=P3,proc_remaining=3
+1176,FINISHED-PROCESS,process_name=P3,sha=d9a5fa39054ecd32a0858d82a5cd14d71543297794158c92cb83b3813db2c6dc
+1176,RUNNING,process_name=P5,remaining_time=499
+1677,FINISHED,process_name=P5,proc_remaining=2
+1677,FINISHED-PROCESS,process_name=P5,sha=d38126b8993434902ee228c3e158f548a7de1ed80448e1679070fc4eaf15ec0f
+1677,RUNNING,process_name=P4,remaining_time=784
+2463,FINISHED,process_name=P4,proc_remaining=1
+2463,FINISHED-PROCESS,process_name=P4,sha=e23f893ab273711a71a6bff5c425d507015f297800e0f6653705df2ed7fde68c
+2463,RUNNING,process_name=P2,remaining_time=851
+3315,FINISHED,process_name=P2,proc_remaining=0
+3315,FINISHED-PROCESS,process_name=P2,sha=da0e0e90687b6267cff3c18eed5a642a32234212a008b72c5693bf0985eaa64d
+Turnaround time 1437
+Time overhead 3.83 2.83
+Makespan 3315

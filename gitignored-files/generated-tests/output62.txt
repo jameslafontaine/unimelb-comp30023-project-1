@@ -1,0 +1,45 @@
+0,RUNNING,process_name=P0,remaining_time=33
+34,FINISHED,process_name=P0,proc_remaining=0
+34,FINISHED-PROCESS,process_name=P0,sha=07d6383f7b63acd1a78a1ae97569209d1db914ebccc4a7e78486d41cd99d8c4c
+34,RUNNING,process_name=P6,remaining_time=178
+212,FINISHED,process_name=P6,proc_remaining=12
+212,FINISHED-PROCESS,process_name=P6,sha=9e34c0d91c217f5f187c859fc6f7be5def70ff4eab62b449ca1d4ea8f983a722
+212,RUNNING,process_name=P7,remaining_time=54
+266,FINISHED,process_name=P7,proc_remaining=11
+266,FINISHED-PROCESS,process_name=P7,sha=8647f8997c5b1fc1d3803ff64cfef3a8dc87d6eb431c3251ab2650d8d2363871
+266,RUNNING,process_name=P10,remaining_time=79
+346,FINISHED,process_name=P10,proc_remaining=10
+346,FINISHED-PROCESS,process_name=P10,sha=9ce54628131b34bd572aa105914db1d1487f9cf12ef743422ba0937c4c9ff8f0
+346,RUNNING,process_name=P5,remaining_time=109
+456,FINISHED,process_name=P5,proc_remaining=9
+456,FINISHED-PROCESS,process_name=P5,sha=659609c6f3e4f2ea50d0593a5fc667b5d9465e911047542086f49d27598c1a2e
+456,RUNNING,process_name=P2,remaining_time=263
+720,FINISHED,process_name=P2,proc_remaining=8
+720,FINISHED-PROCESS,process_name=P2,sha=c2bc31c0db043ce710f44c9f1b623fee8ea92dcdf7d0e47327eee8efd75d06ce
+720,RUNNING,process_name=P11,remaining_time=365
+1086,FINISHED,process_name=P11,proc_remaining=7
+1086,FINISHED-PROCESS,process_name=P11,sha=52ea2aaf8f5a6ddc09efdfbf0edc6c582705319c25f5bef9772cdec67268b78f
+1086,RUNNING,process_name=P13,remaining_time=523
+1610,FINISHED,process_name=P13,proc_remaining=6
+1610,FINISHED-PROCESS,process_name=P13,sha=8fd96193b7a774f00d3b7b57eeda5e746406efb817f3bb5be0a0d07f74a900e9
+1610,RUNNING,process_name=P8,remaining_time=557
+2168,FINISHED,process_name=P8,proc_remaining=5
+2168,FINISHED-PROCESS,process_name=P8,sha=bbe579d3e85d06083b8bae85cd9427851f93fd40a9bef8f6b8934ff0bdcbdd90
+2168,RUNNING,process_name=P12,remaining_time=572
+2740,FINISHED,process_name=P12,proc_remaining=4
+2740,FINISHED-PROCESS,process_name=P12,sha=2935bc9163dc41fc4d1c56d14ab0a1fafedbd5b624c21465b586f8c15255a151
+2740,RUNNING,process_name=P1,remaining_time=665
+3406,FINISHED,process_name=P1,proc_remaining=3
+3406,FINISHED-PROCESS,process_name=P1,sha=07c14cc514f4987ee133524df5ac066fec5cd9f292c7be5dc1d0d343eaba352d
+3406,RUNNING,process_name=P9,remaining_time=682
+4088,FINISHED,process_name=P9,proc_remaining=2
+4088,FINISHED-PROCESS,process_name=P9,sha=45eace4d0b70b875b69f2a47e42e9966f0b5062b021768dd605da12699a294e5
+4088,RUNNING,process_name=P3,remaining_time=822
+4910,FINISHED,process_name=P3,proc_remaining=1
+4910,FINISHED-PROCESS,process_name=P3,sha=60f31b8c3cd37f0fa70e83781ef056a82324e95d15a6a37a1d04a939cebe5de6
+4910,RUNNING,process_name=P4,remaining_time=980
+5890,FINISHED,process_name=P4,proc_remaining=0
+5890,FINISHED-PROCESS,process_name=P4,sha=9734ea6a0ddeecbd9de302682d7e6b547500f5cb0185fe7d48d0955fd99f4b94
+Turnaround time 1921
+Time overhead 5.89 3.64
+Makespan 5890
