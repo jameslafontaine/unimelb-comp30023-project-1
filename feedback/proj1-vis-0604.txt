@@ -1,0 +1,86 @@
+COMP30023 2023 Project 1 Before Deadline Tests (Feedback)
+v8, last modified 05/04/23
+
+Commit log:
+0570aac 2023-04-06T13:45:57+10:00: Added a process manager and skeleton code for a cycle
+17e4118 2023-04-06T09:55:28+10:00: Added header file for process utilities which will support process abstraction and manipulation. Also added functionality for reading and storing process text files
+218bb16 2023-04-05T13:46:41+10:00: Adjustments / additions to linked list tools and implemented function to read in command line arguments
+7b34e2f 2023-04-05T08:58:27+10:00: Added tools for doubly linked list manipulation
+3b8147b 2023-04-05T06:16:33+10:00: Set up local project repository on VM
+cad41d3 2023-03-12T22:09:57+11:00: init: add .gitlab-ci.yml
+
+1 executable files found. They will be removed.
+Executable files are:
+./main
+-----------------------------------
+
+0.5 from build quality.
+make -B && make clean (output suppressed)
+
+1 executable files found. Make sure that your 'make clean' works. 0.5 from build quality.
+Executable files are:
+./main
+-----------------------------------
+
+make clean
+rm -f *.o out1 out2
+
+make
+make returned failure status code, 1 from build quality
+make: *** No rule to make target 'fast.c', needed by 'out1'.  Stop.
+
+-Wall not specified, or use of -Wno, 0.5 from build quality
+
+BAD -- no executable named allocate found, exiting
+.
+|-- Makefile
+|-- README.txt
+|-- cases
+|   |-- task1
+|   |   |-- more-processes.out
+|   |   |-- more-processes.txt
+|   |   |-- simple-sjf.out
+|   |   `-- simple.txt
+|   |-- task2
+|   |   |-- simple-rr.out
+|   |   |-- simple.txt
+|   |   |-- two-processes-1.out
+|   |   |-- two-processes-3.out
+|   |   `-- two-processes.txt
+|   |-- task3
+|   |   |-- non-fit-rr.out
+|   |   |-- non-fit-sjf.out
+|   |   |-- non-fit.txt
+|   |   |-- simple-bestfit.out
+|   |   `-- simple.txt
+|   `-- task4
+|       |-- spec.out
+|       `-- spec.txt
+|-- d_linked_list.c
+|-- d_linked_list.h
+|-- header.h
+|-- input_parser.c
+|-- input_parser.h
+|-- main
+|-- main.c
+|-- process.c
+|-- process_manager.c
+|-- process_manager.h
+|-- process_utils.c
+|-- process_utils.h
+|-- scheduler.c
+`-- scheduler.h
+
+5 directories, 32 files
+Early Bail. FAIL.
+
+=============== START RESULTS TABLE ===============
+Task 1: Shortest Job First                    0
+Task 2: Round Robin                           0
+Task 3: Best Fit Memory Allocation            0
+Task 4: Controlling Real processes            0
+Task 5: Performance statistics computation    0
+Task 6: Build quality                         0
+Task 7: Quality of software practices         #CODE_QUALITY#
+Late penalty:                                 -15
+================ END RESULTS TABLE ================

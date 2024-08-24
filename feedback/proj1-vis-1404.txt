@@ -1,0 +1,68 @@
+COMP30023 2023 Project 1 Before Deadline Tests (Feedback)
+v8, last modified 05/04/23
+
+Checking out 09df3c59a74730a3faae144c917de8c297edc931
+HEAD is now at 09df3c5 Resolved some Task 4 bugs
+Commit log:
+09df3c5 2023-04-13T18:42:14+10:00: Resolved some Task 4 bugs
+36a25d3 2023-04-13T17:02:07+10:00: Task 4 implementation
+d95d565 2023-04-12T10:56:47+10:00: Moved source files to /src
+b8e4e89 2023-04-11T12:12:17+10:00: Implemented best fit memory allocation
+b586019 2023-04-10T20:56:29+10:00: Fixed RR scheduling bug
+14289aa 2023-04-10T20:09:05+10:00: Refactored process manager code and resolved integer overflow bug
+93e30b5 2023-04-09T20:29:21+10:00: Resolved insertion sort and pointer related bugs
+0ef959b 2023-04-09T15:51:49+10:00: Resolved some pointer and insertion sort bugs
+06b3d19 2023-04-09T12:12:55+10:00: Deleted header.h
+d63016f 2023-04-09T12:08:32+10:00: Full execution transcript implementation and resolved some memory related bugs
+e5e2d38 2023-04-08T15:58:13+10:00: Implemented SJF scheduling and part of execution transcript
+bf3b11d 2023-04-07T13:10:13+10:00: Partial process manager implementation
+0570aac 2023-04-06T13:45:57+10:00: Added a process manager and skeleton code for a cycle
+17e4118 2023-04-06T09:55:28+10:00: Added header file for process utilities which will support process abstraction and manipulation. Also added functionality for reading and storing process text files
+218bb16 2023-04-05T13:46:41+10:00: Adjustments / additions to linked list tools and implemented function to read in command line arguments
+7b34e2f 2023-04-05T08:58:27+10:00: Added tools for doubly linked list manipulation
+3b8147b 2023-04-05T06:16:33+10:00: Set up local project repository on VM
+cad41d3 2023-03-12T22:09:57+11:00: init: add .gitlab-ci.yml
+
+make -B && make clean (output suppressed)
+
+make clean
+rm -f *.o allocate
+
+make
+gcc -c -o process_manager.o src/process_manager.c -Wall -g 
+gcc -c -o input_parser.o src/input_parser.c -Wall -g 
+gcc -c -o output.o src/output.c -Wall -g 
+gcc -c -o process_utils.o src/process_utils.c -Wall -g 
+gcc -c -o d_linked_list.o src/d_linked_list.c -Wall -g 
+gcc -Wall -g  -o allocate src/main.c process_manager.o input_parser.o output.o process_utils.o d_linked_list.o -lm
+
+OK -- ./allocate found. Copying to clean working directory.
+Task 4: Found
+
+Visible Tests
+Task 1 simple-sjf (0.5): Passed
+Task 1 more-processes (0.5): Passed
+Task 2 simple-rr (0.5): Passed
+Task 2 two-processes-q1 (0.5): Passed
+Task 2 two-processes-q3 (0.5): Passed
+Task 3 simple-bestfit (0.5): Passed
+Task 3 non-fit-sjf (0.5): Passed
+Task 3 non-fit-rr (0.5): Passed
+Task 4 spec (0.5): Passed
+Task 4 more-processes (0.5): Passed
+Task 4 simple-rr (0.5): Passed
+Task 5 simple-sjf (0.5): Passed
+Task 5 two-processes-q3 (0.5): Passed
+Task v valgrind-ed217 (0): Passed
+
+Well done! You passed all (present) test cases.
+
+=============== START RESULTS TABLE ===============
+Task 1: Shortest Job First                    1.0
+Task 2: Round Robin                           1.5
+Task 3: Best Fit Memory Allocation            1.5
+Task 4: Controlling Real processes            1.5
+Task 5: Performance statistics computation    1.0
+Task 6: Build quality                         1
+Task 7: Quality of software practices         #CODE_QUALITY#
+================ END RESULTS TABLE ================
